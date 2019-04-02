@@ -27,7 +27,6 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
         factor_enums = [set(df[df[base_factor[0]] == base2][x]) for x in sub_factors]
         comparisons_2 = list(product(*factor_enums))
 
-        factors = base_factor + sub_factors
         for i in range(len(factors) - freedom, len(factors)):
             valids = []
             for comp1 in comparisons_1:
@@ -46,12 +45,18 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
                 for v in valids:
                     comparisons.add(tuple(map(tuple, v)))
 
-    factors = base_factor + sorted(sub_factors)
     comp_indices = {}
     for comp in comparisons:
         c1, c2 = comp[0], comp[1]
         c1_i = df[reduce(operator.and_, ((df[x] == c1[i]) for i, x in enumerate(factors)))].index
         c2_i = df[reduce(operator.and_, ((df[x] == c2[i]) for i, x in enumerate(factors)))].index
+        if comp[::-1] in comp_indices:
+            continue
+        if c1_i.empty or c2_i.empty:
+            continue
+        # This next test should never happen, we filter it out when constructing the initial DF
+        if len(c1_i) == 1 or len(c2_i) == 1:
+            continue
         comp_indices[tuple(map(tuple, comp))] = [c1_i, c2_i]
     return comp_indices
 

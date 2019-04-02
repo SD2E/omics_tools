@@ -1,5 +1,3 @@
-import sys
-import argparse as arg
 from omics_dashboard import utils, comparison_generator
 import os
 import pandas as pd
@@ -28,19 +26,7 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     if not os.path.exists('./scripts/'):
         os.mkdir('./scripts/')
 
-    contrast_strings = []
-    for comp in comparison_indices:
-        unrolled = comparison_indices[comp]
-        indices = list(unrolled[0]) + list(unrolled[1])
-        group_a = [groups_array[int(j) - 1] for j in list(unrolled[0])]
-        group_b = [groups_array[int(j) - 1] for j in list(unrolled[1])]
-        unrolled_digits = [0] * len(set(groups_array))
-        for a in group_a:
-            unrolled_digits[a - 1] = 1
-        for b in group_b:
-            unrolled_digits[b - 1] = -1
-        c = 'c({})'.format(','.join(map(str, unrolled_digits)))
-        contrast_strings.append((comp, c, indices))
+    contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
     #if run_dir:
     #    files = open(run_dir + '/edgeR_files.txt', 'w')
@@ -112,19 +98,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
     if run_dir:
         df_file = run_dir + df_file
 
-    contrast_strings = []
-    for comp in comparison_indices:
-        unrolled = comparison_indices[comp]
-        indices = list(unrolled[0]) + list(unrolled[1])
-        group_a = [groups_array[int(j) - 1] for j in list(unrolled[0])]
-        group_b = [groups_array[int(j) - 1] for j in list(unrolled[1])]
-        unrolled_digits = [0] * len(set(groups_array))
-        for a in group_a:
-            unrolled_digits[a - 1] = 1
-        for b in group_b:
-            unrolled_digits[b - 1] = -1
-        c = 'c({})'.format(','.join(map(str, unrolled_digits)))
-        contrast_strings.append((comp, c, indices))
+    contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
     R_cmds = []
     for e, c in enumerate(contrast_strings):
@@ -133,10 +107,9 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         name0  = '#' + c_
         edger0 = Rscript2(df_file, base_factor + sub_factors)
         edger1 = 'group <- factor(c{0})'.format(tuple(groups_array))
-        edger2 = 't_cts[is.na(t_cts)] <- 0'
-        edger3 = 'y <- DGEList(counts=t_cts, group=group)'
-        edger4 = 'y <- calcNormFactors(y)'
-        edger5 = 'design <- model.matrix(~0 + group)'
+        edger2 = 'y <- DGEList(counts=t_cts, group=group)'
+        edger3 = 'y <- calcNormFactors(y)'
+        edger4 = 'design <- model.matrix(~0 + group)'
 
         filt0  = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
         filt1  = 'y <- y[keep, ,]'
@@ -145,10 +118,27 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         str1   = 'qlf <- glmQLFTest(fit, contrast={})'.format(c[1])
         str2   = 'tab <- topTags(qlf, n=Inf)'
 
-        R_string = '\n'.join([name0, edger0, edger1, edger2, edger3, edger4, edger5,
+        R_string = '\n'.join([name0, edger0, edger1, edger2, edger3, edger4,
                               filt0, filt1, filt2, str0, str1, str2])
         R_cmds.append(R_string)
     return R_cmds
+
+
+def make_contrast_strings(comparison_indices, groups_array):
+    contrast_strings = []
+    for comp in comparison_indices:
+        unrolled = comparison_indices[comp]
+        indices = list(unrolled[0]) + list(unrolled[1])
+        group_a = [groups_array[int(j)] for j in list(unrolled[0])]
+        group_b = [groups_array[int(j)] for j in list(unrolled[1])]
+        unrolled_digits = [0] * len(set(groups_array))
+        for a in group_a:
+            unrolled_digits[a - 1] = 1
+        for b in group_b:
+            unrolled_digits[b - 1] = -1
+        c = 'c({})'.format(','.join(map(str, unrolled_digits)))
+        contrast_strings.append((comp, c, indices))
+    return contrast_strings
 
 
 def Rscript(count_fname, groups_array, factors=None):
@@ -177,28 +167,8 @@ group <- factor(c{1})
 
 y <- DGEList(counts=t_cts, group=group)
 y <- calcNormFactors(y)
-
 design <- model.matrix(~0 + group)
 """.format(tuple(factors), tuple(groups_array))
-    return cmd
-
-
-def Rscript2(count_fname, factors):
-    cmd = """
-library(edgeR)
-options(scipen=999)
-x <- read.delim('{0}', sep=',', stringsAsFactors=TRUE)
-""".format(count_fname)
-    for factor in factors:
-        cmd += """
-x${0} <- factor(x${0})
-""".format(factor)
-    cmd += """
-drops <- c{0}
-counts <- x[, !(names(x) %in% drops)]
-t_cts <- t(counts)
-#colnames(t_cts) <- x$filename
-""".format(tuple(factors))
     return cmd
 
 
@@ -217,20 +187,34 @@ Rscript $WD/scripts/dge_{1}.r > $WD/$RESULTS/dge_{1}_log.txt
 '''.format(run_dir, str(e))
 
 
+def Rscript2(count_fname, factors):
+    cmd = """
+library(edgeR)
+options(scipen=999)
+x <- read.delim('{0}', sep=',', stringsAsFactors=TRUE)
+""".format(count_fname)
+    for factor in factors:
+        cmd += """
+x${0} <- factor(x${0})
+""".format(factor)
+    cmd += """
+drops <- c{0}
+counts <- x[, !(names(x) %in% drops)]
+t_cts <- t(counts)
+t_cts[is.na(t_cts)] <- 0
+#colnames(t_cts) <- x$filename
+""".format(tuple(factors))
+    return cmd
+
+
 def edger(rcmd):
     from rpy2.robjects import r
     from rpy2.robjects import pandas2ri
-    from rpy2.rinterface import RRuntimeWarning
-    from rpy2.robjects.packages import importr
-    base = importr('base')
-    base.warnings()
     pandas2ri.activate()
-    try:
-        ret = r(rcmd)
-        df = r('as.data.frame(tab)')
-    except RRuntimeWarning as e:
-        print(e)
-        df = pd.DataFrame()
+
+    r(rcmd)
+    df = r('as.data.frame(tab)')
+
     name = rcmd.split('\n')[0][1:]
     return (df, name)
 
@@ -247,7 +231,10 @@ def applyParallel(groups, func, cores=None):
 
 
 def run_edgeR(rcmds, cores=None):
-    dfs = applyParallel(rcmds, edger, cores)
+    if isinstance(rcmds, list):
+        dfs = applyParallel(rcmds, edger, cores)
+    else:
+        dfs = [edger(rcmds)]
     de_dfs = {}
     for study in dfs:
         de_dfs[study[1]] = study[0]

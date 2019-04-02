@@ -11,11 +11,24 @@ def create_tempfile(df):
     return name
 
 
-def group_by_factors(df, factors):
+def group_by_factors(dataframe, factors):
+    passed_qc_vals = dataframe.drop(factors, axis=1).values
+    passed_qc_index = dataframe[factors].values
+    passed_qc_cols = dataframe.drop(factors, axis=1).columns
+    group_df = pd.DataFrame(passed_qc_vals, index=[list(x) for x in passed_qc_index.T], columns=passed_qc_cols)
+    groups = {}
     labels = []
-    for e, (g, d) in enumerate(df.groupby(by=factors)):
-        labels.append([e + 1] * len(d))
-    return list(chain.from_iterable(labels))
+    group_iter = 1
+    for i, (e, d) in enumerate(group_df.iterrows()):
+        if e in groups:
+            groups[e][1].append(i)
+            groupnum = groups[e][0]
+        else:
+            groups[e] = [group_iter, [i]]
+            groupnum = group_iter
+            group_iter += 1
+        labels.append(groupnum)
+    return labels
 
 
 def load_DE_results(de_results_dir):
