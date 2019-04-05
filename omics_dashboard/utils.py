@@ -206,8 +206,7 @@ def filter_df(filter_string, df, pthresh=1):
     return df
 
 
-# filtered_df = utils.subset_df(cgdf, ['Strain4, Strain1'], pivot=['temp'])
-def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1):
+def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=9):
     filter_ = []
     if strains:
         for strain in strains:
@@ -233,8 +232,9 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1):
         df = df.loc[filter_]
 
     constant_filter = []
-    if not isinstance(constants, dict):
-        print('ERROR constants must be a dictionary {factor: value}')
+    if constants:
+        if not isinstance(constants, dict):
+            print('ERROR constants must be a dictionary {\'Time\': \'8\'')
 
     if constants:
         for x in df.index:
@@ -254,6 +254,9 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1):
 
     df[(0 < df) & (df < pthresh)] = 0
     df[(0 > df) & (df > -pthresh)] = 0
+
+    df[df > max_p] = max_p
+    df[df < -max_p] = -max_p
 
     df[df == 0] = np.nan
     df = df.dropna(thresh=1, axis=1).dropna(thresh=1, axis=0)
