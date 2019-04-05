@@ -1,48 +1,43 @@
+import os
 import pandas as pd
-from omics_dashboard import kegg, geneontology as go
+from omics_dashboard import geneontology as go
 from omics_dashboard.utils import filter_de_results
 import numpy as np
 from functools import partial
 from rpy2.robjects import r, pandas2ri
 from rpy2.robjects.packages import importr
+import ftplib
+import gzip
+import urllib.request
+import shutil
 
 
-def run_GO_annotation(taxid, de_df, alpha=0.05, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05):
-    def GO_anno(de_):
-        de_data = go.id_to_genelist(GeneID2nt, de_)
-        de_data_filtered = filter_de_results(de_data, logFC, pval, fdr)
-        de_data_to_GO = {'up': go.get_ID2nt(GeneID2nt, de_data_filtered, 'up'),
-                         'down': go.get_ID2nt(GeneID2nt, de_data_filtered, 'down')}
-
-        up_genes = de_data_to_GO['up']
-        down_genes = de_data_to_GO['down']
-        goea_results = {'up': [r for r in goeaobj.run_study(up_genes) if r.p_fdr_bh < multi_fdr],
-                        'down': [r for r in goeaobj.run_study(down_genes) if r.p_fdr_bh < multi_fdr]}
-
-        cols = ['GO', 'NS', 'p_fdr', 'count', 'terms']
-        up_res = goea_results['up']
-        down_res = goea_results['down']
-        up_df = pd.DataFrame([[k.GO, k.NS, k.p_fdr_bh, k.study_count, k.goterm.name] for k in up_res], columns=cols)
-        down_df = pd.DataFrame([[k.GO, k.NS, k.p_fdr_bh, k.study_count, k.goterm.name] for k in down_res], columns=cols)
-        return up_df, down_df
-
-    if isinstance(de_df, pd.DataFrame):
-        goeaobj, GeneID2nt = go.build_network(taxid, alpha)
-        up_df, down_df = GO_anno(de_df)
-        goea_df = {'up': up_df,
-                   'down': down_df}
-        return goea_df
+def applyParallel(func, groups, cores=None):
+    from multiprocessing import Pool, cpu_count
+    if cores:
+        cores = cores
     else:
-        goeaobj, GeneID2nt = go.build_network(taxid, alpha)
-        goea_df = {}
-        for study in de_df:
-            up_df, down_df = GO_anno(de_df[study])
-            goea_df[study] =  {'up': up_df,
-                               'down': down_df}
-        return goea_df
+        cores = cpu_count()
+    with Pool(cores) as p:
+        ret_list = p.map(func, groups)
+    return ret_list
 
 
-def goanna(study, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05):
+def symbol_to_entrez(taxid=511145):
+    curdir = os.path.dirname(os.path.abspath(__file__))
+    with open(curdir + '/data/Bacteria.gene_info') as of:
+        data = of.readlines()
+    symbol_to_entrez = {}
+    for line in data[1:]:
+        line = line.split()
+        if line[0] == str(taxid):
+            symbol = line[2]
+            locustag = line[3]
+            symbol_to_entrez[symbol] = locustag
+    return symbol_to_entrez
+
+
+def go_anno(study, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05):
     name = study[0]
     df = study[1]
     goeaobj, GeneID2nt = go.build_network(taxid, multi_fdr)
@@ -64,19 +59,9 @@ def goanna(study, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05):
     return ([up_df, down_df], name)
 
 
-def applyParallel(func, groups, cores=None):
-    from multiprocessing import Pool, cpu_count
-    if cores:
-        cores = cores
-    else:
-        cores = cpu_count()
-    with Pool(cores) as p:
-        ret_list = p.map(func, groups)
-    return ret_list
-
-
-def run_goanna(studies, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05, cores=None):
-    func = partial(goanna, taxid=taxid, logFC=logFC, pval=pval, fdr=fdr, multi_fdr=multi_fdr)
+def run_go(studies, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05, cores=None):
+    check_data_files()
+    func = partial(go_anno, taxid=taxid, logFC=logFC, pval=pval, fdr=fdr, multi_fdr=multi_fdr)
     dfs = applyParallel(func, studies.items(), cores)
     go_dfs = {}
     for study in dfs:
@@ -85,59 +70,19 @@ def run_goanna(studies, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=
     return go_dfs
 
 
-def run_KEGG_annotation(taxid, de_df, species='eco', logFC=0.5, pval=0.05, fdr=0.05):
-    symbol_to_entrez = kegg.symbol_to_entrez(taxid)
-
-    de_data = {}
-    for de_gene, row in de_df.iterrows():
-        dat = row.values
-        for gene in symbol_to_entrez:
-            if gene.lower() == de_gene.lower():
-                # gene, logFC, Pval, FDR
-                de_data[symbol_to_entrez[gene]] = [dat[0], dat[3], dat[4]]
-
-    de_data = filter_de_results(de_data, logFC, pval, fdr)
-
-    de_kegg = {'up': {},
-               'down': {}}
-
-    importr('clusterProfiler')
-    for sign in ['up', 'down']:
-        if len(de_data[sign]) != 0:
-            if len(de_data[sign]) == 1:
-                kegg_str = "c('{0}')".format(list(de_data[sign])[0])
-            else:
-                kegg_str = "c{0}".format(tuple(['{0}'.format(k) for k in de_data[sign]]))
-
-            r_cmd = 'z <- enrichKEGG(gene={0}, organism = "{1}", pvalueCutoff = {2})'.format(kegg_str, species, pval)
-            r(r_cmd)
-
-            try:
-                res = r('z@result')
-            except Exception as e:
-                print('ERROR: enrichKEGG failed -> ', e)
-                res = None
-
-            if res:
-                de_kegg[sign] = pandas2ri.rpy2py_dataframe(res)
-            else:
-                de_kegg[sign] = pd.DataFrame()
-    return de_kegg
-
-
 def kegg_anno(study, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05):
     name = study[0]
     df = study[1]
 
-    symbol_to_entrez = kegg.symbol_to_entrez(taxid)
+    symbols = symbol_to_entrez(taxid)
 
     de_data = {}
     for de_gene, row in df.iterrows():
         dat = row.values
-        for gene in symbol_to_entrez:
+        for gene in symbols:
             if gene.lower() == de_gene.lower():
                 # gene, logFC, Pval, FDR
-                de_data[symbol_to_entrez[gene]] = [dat[0], dat[3], dat[4]]
+                de_data[symbols[gene]] = [dat[0], dat[3], dat[4]]
 
     de_data = filter_de_results(de_data, logFC, pval, fdr)
 
@@ -272,3 +217,66 @@ def functional_annotations(go_df, kegg_df):
                     desc = desc.replace('\'', '')
                     go_kegg_to_func[term] = [desc, 'KEGG']
     return go_kegg_to_func
+
+
+def check_data_files():
+    curdir = os.path.dirname(os.path.abspath(__file__))
+    gene2go = curdir + '/data/gene2go'
+
+    if not os.path.exists(gene2go):
+        with open(gene2go +'.gz', 'wb') as f:
+
+            print('INFO: downloading gene2go')
+            ftp = ftplib.FTP(host='ftp.ncbi.nih.gov',
+                             user='anonymous',
+                             passwd='acristof@mit.edu')
+            d = '/gene/DATA/'
+            ftp.cwd(d)
+            ftp.retrbinary('RETR gene2go.gz', f.write)
+            ftp.quit
+
+        print('INFO: extracting')
+        with gzip.open(gene2go + '.gz', 'rb') as f_in:
+            with open(gene2go, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+
+        try:
+            os.remove(gene2go + '.gz')
+        except OSError:
+            pass
+        print('INFO: complete')
+
+    geneinfo = curdir + '/data/Bacteria.gene_info'
+    if not os.path.exists(geneinfo):
+        with open(geneinfo + '.gz', 'wb') as f:
+
+            print('INFO: Downloading bacteria gene info')
+            ftp = ftplib.FTP(host='ftp.ncbi.nih.gov',
+                             user='anonymous',
+                             passwd='acristof@mit.edu')
+            d = '/gene/DATA/GENE_INFO/Archaea_Bacteria/'
+            ftp.cwd(d)
+            ftp.retrbinary('RETR Bacteria.gene_info.gz', f.write)
+            ftp.quit
+
+        print('INFO: extracting')
+        with gzip.open(geneinfo + '.gz', 'rb') as f_in:
+            with open(geneinfo, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        try:
+            os.remove(geneinfo + '.gz')
+        except OSError:
+            pass
+        print('INFO: complete')
+
+
+    obo = curdir + '/data/go-basic.obo'
+    if not os.path.exists(obo):
+
+        print('INFO: downloading GO graph')
+        url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
+        with urllib.request.urlopen(url) as response, open(obo, 'wb') as out_file:
+            shutil.copyfileobj(response, out_file)
+
+        print('INFO: complete')
+

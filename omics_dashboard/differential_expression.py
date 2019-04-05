@@ -146,7 +146,7 @@ def Rscript(count_fname, groups_array, factors=None):
     Need to modify input dataframe with filename associated with each sample in column "filename"
     """
     cmd = """
-library(edgeR)
+suppressMessages(library(edgeR))
 options(scipen=999)
 
 x <- read.delim('{0}', sep=',', stringsAsFactors=TRUE)
@@ -189,7 +189,7 @@ Rscript $WD/scripts/dge_{1}.r > $WD/$RESULTS/dge_{1}_log.txt
 
 def Rscript2(count_fname, factors):
     cmd = """
-library(edgeR)
+suppressMessages(library(edgeR))
 options(scipen=999)
 x <- read.delim('{0}', sep=',', stringsAsFactors=TRUE)
 """.format(count_fname)
@@ -219,14 +219,32 @@ def edger(rcmd):
     return (df, name)
 
 
-def applyParallel(groups, func, cores=None):
+"""def applyParallel(groups, func, cores=None):
     from multiprocessing import Pool, cpu_count
     if cores:
         cores = cores
     else:
         cores = cpu_count()
     with Pool(cores) as p:
-        ret_list = p.map(func, groups)
+        try:
+            ret_list = p.map(func, groups)
+        except Exception as e:
+            print(e)
+    return ret_list"""
+
+
+def applyParallel(groups, func, cores=None):
+    from multiprocessing import Pool, cpu_count
+    if cores:
+        cores = cores
+    else:
+        cores = cpu_count()
+    p = Pool(cores)
+    ret_list = []
+    for i in groups:
+        p.apply_async(func, args=(i,), callback=ret_list.append)
+    p.close()
+    p.join()
     return ret_list
 
 

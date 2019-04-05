@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import numpy as np
-from itertools import chain, combinations
+from itertools import combinations
 from collections import OrderedDict
 
 
@@ -124,8 +124,8 @@ def log10_conv(x, max_cut=9):
     x[x > 0] = -1*np.log10(x)
     x[x < 0] = np.log10(-1*x)
     if max_cut:
-        x[x > 9]  = max_cut
-        x[x < -9] = -max_cut
+        x[x > max_cut]  = max_cut
+        x[x < -max_cut] = -max_cut
     return x
 
 
@@ -233,6 +233,9 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1):
         df = df.loc[filter_]
 
     constant_filter = []
+    if not isinstance(constants, dict):
+        print('ERROR constants must be a dictionary {factor: value}')
+
     if constants:
         for x in df.index:
             comp = x[0].split('-vs-')
