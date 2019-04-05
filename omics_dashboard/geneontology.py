@@ -1,10 +1,6 @@
 from goatools.associations import read_ncbi_gene2go
 from goatools.obo_parser import GODag
 from goatools.go_enrichment import GOEnrichmentStudy
-from goatools.godag_plot import plot_results
-import ftplib
-import gzip
-import shutil
 import os
 
 

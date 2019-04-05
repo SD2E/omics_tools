@@ -219,20 +219,6 @@ def edger(rcmd):
     return (df, name)
 
 
-"""def applyParallel(groups, func, cores=None):
-    from multiprocessing import Pool, cpu_count
-    if cores:
-        cores = cores
-    else:
-        cores = cpu_count()
-    with Pool(cores) as p:
-        try:
-            ret_list = p.map(func, groups)
-        except Exception as e:
-            print(e)
-    return ret_list"""
-
-
 def applyParallel(groups, func, cores=None):
     from multiprocessing import Pool, cpu_count
     if cores:

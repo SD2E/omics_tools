@@ -3,5 +3,4 @@ dist/
 *egg-info
 __pycache__/
 .ipynb*
-data/Bacteria.gene_info
-data/gene2go
+data/
