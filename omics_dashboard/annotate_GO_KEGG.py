@@ -96,14 +96,12 @@ def kegg_anno(study, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05
             else:
                 kegg_str = "c{0}".format(tuple(['{0}'.format(k) for k in de_data[sign]]))
 
-            r_cmd = 'z <- enrichKEGG(gene={0}, organism = "{1}", pvalueCutoff = {2})'.format(kegg_str, species, pval)
+            r_cmd = 'invisible(z <- enrichKEGG(gene={0}, organism = "{1}", pvalueCutoff = {2}))'.format(kegg_str,
+                                                                                                        species, pval)
             r(r_cmd)
 
-            try:
-                res = r('z@result')
-            except Exception as e:
-                print('ERROR: enrichKEGG failed -> ', e)
-                res = None
+            res = None
+            res = r('if (!is.null(z)) {z@result}')
 
             if res:
                 de_kegg[sign] = pandas2ri.rpy2py_dataframe(res)

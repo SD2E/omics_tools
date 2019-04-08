@@ -130,6 +130,33 @@ def log10_conv(x, max_cut=9):
 
 
 def create_clustergrammer_matrix_file(annotated_dataframe, factor_to_categories, terms=False, fname='clustergrammer'):
+    index_reordered = []
+    values_reordered = []
+    for e, (i, x) in enumerate(annotated_dataframe.iterrows()):
+        comp = x.name.split('-vs-')
+        c1 = [z for z in comp[0].split('_')]
+        c2 = [z for z in comp[1].split('_')]
+        cols = list(map(str, list(range(len(c1)))))
+
+        reor_df = pd.DataFrame([c1, c2], columns=cols)
+        reor_df[cols] = reor_df[cols].apply(pd.to_numeric, errors='ignore')
+        reor_df.sort_values(cols, axis=0, inplace=True)
+
+        new_comp = []
+        for i, z in reor_df.iterrows():
+            new_comp.append('_'.join([str(y) for y in z.values]))
+
+        if comp[0] != new_comp[0]:
+            val_idxs = np.nonzero(x.values)
+            x.values[val_idxs] = -1 * x.values[val_idxs]
+
+        new_comp = '-vs-'.join(new_comp)
+
+        values_reordered.append(x.values)
+        index_reordered.append(new_comp)
+    annotated_dataframe = pd.DataFrame(values_reordered, index=index_reordered, columns=annotated_dataframe.columns)
+    annotated_dataframe.index.name = 'study'
+
     # Rework the first columns to allow groupby factors
     cg_groups = {}
     for studynumber, study in annotated_dataframe.iterrows():
@@ -177,6 +204,7 @@ def create_clustergrammer_matrix_file(annotated_dataframe, factor_to_categories,
     annotated_dataframe = annotated_dataframe.replace(np.inf, 0).copy()
     annotated_dataframe.to_csv(fname + '.txt', sep='\t')
 
+
 def filter_df(filter_string, df, pthresh=1):
     filter_ = []
     for x in df.index:
@@ -218,11 +246,39 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=9)
     filter_ = []
     sub_factor_order = df.index[0][1:]
     if pivots:
+        index_reordered = []
+        values_reordered = []
+        for e, (i, x) in enumerate(df.iterrows()):
+            comp = x.name[0].split('-vs-')
+            c1 = [z for z in comp[0].split('_')]
+            c2 = [z for z in comp[1].split('_')]
+            cols = ['study'] + [k.split(':')[0] for k in x.name[1:]]
+
+            reor_df = pd.DataFrame([c1, c2], columns=cols)
+            reor_df[cols] = reor_df[cols].apply(pd.to_numeric, errors='ignore')
+            reor_df.sort_values(pivots, axis=0, inplace=True)
+
+            new_comp = []
+            for i, z in reor_df.iterrows():
+                new_comp.append('_'.join([str(y) for y in z.values]))
+
+            if comp[0] != new_comp[0]:
+                val_idxs = np.nonzero(x.values)
+                x.values[val_idxs] = -1 * x.values[val_idxs]
+
+            new_comp = '-vs-'.join(new_comp)
+            x_name = [new_comp] + list(x.name)[1:]
+
+            values_reordered.append(x.values)
+            index_reordered.append(tuple(x_name))
+        df = pd.DataFrame(values_reordered, index=index_reordered, columns=df.columns)
+
         for pivot in pivots:
             for x in df.index:
                 comp = x[0].split('-vs-')
                 s1, s2 = comp[0].split('_'), comp[1].split('_')
-                pivot_index = [i for i, el in enumerate(sub_factor_order) if pivot.lower() in sub_factor_order[i].lower()]
+                pivot_index = [i for i, el in enumerate(sub_factor_order) if
+                               pivot.lower() in sub_factor_order[i].lower()]
 
                 same = [s1[i] == s2[i] for i in range(1, len(s1))]
                 if not pivot_index:
