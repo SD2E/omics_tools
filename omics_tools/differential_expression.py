@@ -1,4 +1,4 @@
-from omics_dashboard import utils, comparison_generator
+from omics_tools import utils, comparison_generator
 import os
 import pandas as pd
 
@@ -36,7 +36,7 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
         filt0 = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
         filt1 = 'y <- y[keep, ,]'
         filt2 = 'y <- estimateDisp(y, design)'
-        str0 = 'fit <- glmQLFit(y, design, robust=TRUE)'
+        str0 = 'fit <- glmQLFit(y, design)'
         str1 = 'qlf <- glmQLFTest(fit, contrast={})'.format(c[1])
         str2 = 'tab <- topTags(qlf, n=Inf)'
         c_ = '-vs-'.join(['_'.join(map(str, x)) for x in c[0]])
@@ -114,7 +114,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         filt0  = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
         filt1  = 'y <- y[keep, ,]'
         filt2  = 'y <- estimateDisp(y, design)'
-        str0   = 'fit <- glmQLFit(y, design, robust=TRUE)'
+        str0   = 'fit <- glmQLFit(y, design)'
         str1   = 'qlf <- glmQLFTest(fit, contrast={})'.format(c[1])
         str2   = 'tab <- topTags(qlf, n=Inf)'
 

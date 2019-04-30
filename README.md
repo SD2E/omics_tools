@@ -45,6 +45,6 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 
 ### Acknowledgements
 
-Clustergrammer2 for the heatmap visualization.
+- Clustergrammer2 for the heatmap visualization.
 - GOATOOLS for gene ontology annotation.
 - ClusterProfiler for KEGG annotation.   

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
-from omics_dashboard import geneontology as go
-from omics_dashboard.utils import filter_de_results
+from omics_tools import geneontology as go
+from omics_tools.utils import filter_de_results
 import numpy as np
 from functools import partial
 from rpy2.robjects import r, pandas2ri
@@ -88,7 +88,7 @@ def kegg_anno(study, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05
 
     de_kegg = {'up': {},
                'down': {}}
-    importr('clusterProfiler')
+    importr('clusterProfiler', suppress_messages=True)
     for sign in ['up', 'down']:
         if len(de_data[sign]) != 0:
             if len(de_data[sign]) == 1:
@@ -100,13 +100,14 @@ def kegg_anno(study, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05
                                                                                                         species, pval)
             r(r_cmd)
 
-            res = None
             res = r('if (!is.null(z)) {z@result}')
+            try:
+                res = pandas2ri.rpy2py_dataframe(res)
+            except AttributeError as e:
+                print('No KEGG enrichment found for {}-regulated {}'.format(sign, name))
+                res = pd.DataFrame()
 
-            if res:
-                de_kegg[sign] = pandas2ri.rpy2py_dataframe(res)
-            else:
-                de_kegg[sign] = pd.DataFrame()
+            de_kegg[sign] = res
     return (de_kegg, name)
 
 

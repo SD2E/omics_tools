@@ -5,8 +5,11 @@ from itertools import combinations
 from collections import OrderedDict
 
 
-def create_tempfile(df):
-    name = 'edgeR_matfile.csv'
+def create_tempfile(df, fn=None):
+    if fn:
+        name = fn
+    else:
+        name = 'edgeR_matfile.csv'
     df.to_csv(name, index=False, encoding='utf-8')
     return name
 
@@ -234,13 +237,37 @@ def filter_df(filter_string, df, pthresh=1):
     return df
 
 
-def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=9):
+def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=15, other_strains=True, same=True):
     filter_ = []
     if strains:
-        for strain in strains:
-            for x in df.index:
-                if strain in x[0]:
+        for x in df.index:
+            z = x[0].split('-vs-')
+            for strain in strains:
+                if strain in z[0] or strain in z[1]:
                     filter_.append(x)
+
+        remove_strains = []
+        if not other_strains:
+            for study in filter_:
+                studynames = study[0].split('-vs-')
+                presence = []
+                for strain in strains:
+                    if strain in studynames[0]:
+                        presence.append(1)
+                    if strain in studynames[1]:
+                        presence.append(1)
+                if sum(presence) != 2:
+                    remove_strains.append(study)
+        remove_same_strains = []
+        if not same:
+            for study in filter_:
+                studynames = study[0].split('-vs-')
+                for strain in strains:
+                    if strain in studynames[0] and strain in studynames[1]:
+                        remove_same_strains.append(study)
+
+        filter_ = set(filter_) - set(remove_strains) - set(remove_same_strains)
+        filter_ = list(set(filter_))
         df = df.loc[filter_]
 
     filter_ = []

@@ -1,1 +1,1 @@
-include omics_dashboard/data/scientific_taxids.txt LICENSE.md README.md requirements.txt setup.py
+include omics_tools/data/scientific_taxids.txt LICENSE.md README.md requirements.txt setup.py

@@ -1,1 +1,0 @@
-name = "omics_dashboard"
