@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="omics-dashboard",
+    name="omics_tools",
     version="1.0",
     author="AC",
     author_email="acristof@mit.edu",
