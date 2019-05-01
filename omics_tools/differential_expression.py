@@ -1,6 +1,7 @@
 from omics_tools import utils, comparison_generator
 import os
 import pandas as pd
+from rpy2.robjects import r
 
 
 def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=None, base_factor=['strain'],
@@ -234,7 +235,15 @@ def applyParallel(groups, func, cores=None):
     return ret_list
 
 
+def check_installs():
+    install_cmd = """if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("edgeR")"""
+    r(install_cmd)
+
+
 def run_edgeR(rcmds, cores=None):
+    check_installs()
     if isinstance(rcmds, list):
         dfs = applyParallel(rcmds, edger, cores)
     else:

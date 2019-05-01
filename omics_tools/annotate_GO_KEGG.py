@@ -111,7 +111,15 @@ def kegg_anno(study, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05
     return (de_kegg, name)
 
 
+def check_installs():
+    install_cmd = """if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("clusterProfiler")"""
+    r(install_cmd)
+
+
 def run_kegg(studies, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05, cores=None):
+    check_installs()
     func = partial(kegg_anno, taxid=taxid, species=species, logFC=logFC, pval=pval, fdr=fdr)
     dfs = applyParallel(func, studies.items(), cores)
     kegg_dfs = {}
