@@ -130,8 +130,8 @@ def make_contrast_strings(comparison_indices, groups_array):
     for comp in comparison_indices:
         unrolled = comparison_indices[comp]
         indices = list(unrolled[0]) + list(unrolled[1])
-        group_a = [groups_array[int(j)-1] for j in list(unrolled[0])]
-        group_b = [groups_array[int(j)-1] for j in list(unrolled[1])]
+        group_a = [groups_array[int(j)] for j in list(unrolled[0])]
+        group_b = [groups_array[int(j)] for j in list(unrolled[1])]
         unrolled_digits = [0] * len(set(groups_array))
         for a in group_a:
             unrolled_digits[a - 1] = 1
