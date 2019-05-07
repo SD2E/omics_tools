@@ -15,7 +15,7 @@ ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz and extract to the data/ directo
 
 ### Installing
 
-pip install -I .
+pip install -I .  
 jupyter nbextension enable --py --sys-prefix widgetsnbextension  
 jupyter nbextension enable --py --sys-prefix clustergrammer_widget  
 
@@ -50,3 +50,4 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 - Clustergrammer2 for the heatmap visualization.
 - GOATOOLS for gene ontology annotation.
 - ClusterProfiler for KEGG annotation.   
+- edgeR for differential expression.
