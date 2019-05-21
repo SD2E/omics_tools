@@ -10,6 +10,8 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     sub_factors = sorted(sub_factors)
     if not isinstance(dataframe, pd.DataFrame):
         dataframe = utils.prepare_dataframe(data_frame_path, base_factor + sub_factors, metadata, transpose)
+    dataframe.reset_index(drop=True, inplace=True)
+
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
 
     if not base_comparisons:
@@ -238,7 +240,8 @@ def applyParallel(groups, func, cores=None):
 def check_installs():
     install_cmd = """if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("edgeR")"""
+if (!requireNamespace("edgeR", quietly=TRUE))
+    BiocManager::install("edgeR")"""
     r(install_cmd)
 
 
