@@ -12,28 +12,17 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
         dataframe = utils.prepare_dataframe(data_frame_path, base_factor + sub_factors, metadata, transpose)
     dataframe.reset_index(drop=True, inplace=True)
 
-    groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
-
-    if not base_comparisons:
-        base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
-
-    comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom)
-
     df_file = os.path.basename(utils.create_tempfile(dataframe))
-
-    #if run_dir:
-    #    if not os.path.exists(run_dir + '/scripts/'):
-    #        os.mkdir(run_dir + '/scripts/')
-    #else:
     if not os.path.exists('./scripts/'):
         os.mkdir('./scripts/')
 
+    if not base_comparisons:
+        base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
+    comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
+                                                                   sub_factors, freedom)
+    groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
-    #if run_dir:
-    #    files = open(run_dir + '/edgeR_files.txt', 'w')
-    #else:
     files = open('./edgeR_files.txt', 'w')
     for e, c in enumerate(contrast_strings):
         filt0 = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
@@ -47,8 +36,6 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
         str3 = 'write.table(tab, file="{}.txt")'.format(c_)
         R_string = '\n'.join([filt0, filt1, filt2, str0, str1, str2, str3])
         fn = './scripts/dge_{}.r'.format(str(e))
-        #if run_dir:
-        #    fn = run_dir + '/scripts/dge_{}.r'.format(str(e))
         if run_dir:
             with open(fn, 'w') as of:
                 of.write(Rscript(run_dir+df_file, groups_array, factors=base_factor + sub_factors))
@@ -144,12 +131,21 @@ def make_contrast_strings(comparison_indices, groups_array):
     return contrast_strings
 
 
+def format_groups_array(groups_array):
+    if len(groups_array) > 300:
+        formatted_cmd = 'group <- c{}'.format(tuple(groups_array[:300]))
+
+        for i in range(300, len(groups_array), 300):
+            chunk = str(tuple(groups_array[i:i + 300])).replace('(', '').replace(')', '')
+            formatted_cmd += '\ngroup <- c(group, {})'.format(chunk)
+        formatted_cmd += '\ngroup <- factor(group)'
+    else:
+        formatted_cmd = '\ngroup <- factor(c{})'.format(tuple(groups_array))
+    return formatted_cmd
+
+
 def Rscript(count_fname, groups_array, factors=None):
-    """
-    Need to modify input dataframe with filename associated with each sample in column "filename"
-    """
-    cmd = """
-suppressMessages(library(edgeR))
+    cmd = """suppressMessages(library(edgeR))
 options(scipen=999)
 
 x <- read.delim('{0}', sep=',', stringsAsFactors=TRUE)
@@ -166,12 +162,12 @@ t_cts[is.na(t_cts)] <- 0
 
 #colnames(t_cts) <- x$filename
 
-group <- factor(c{1})
+{1}
 
 y <- DGEList(counts=t_cts, group=group)
 y <- calcNormFactors(y)
 design <- model.matrix(~0 + group)
-""".format(tuple(factors), tuple(groups_array))
+""".format(tuple(factors), format_groups_array(groups_array))
     return cmd
 
 
@@ -248,8 +244,10 @@ if (!requireNamespace("edgeR", quietly=TRUE))
 def run_edgeR(rcmds, cores=None):
     check_installs()
     if isinstance(rcmds, list):
+        print('Running {} pair-wise differential tests through edgeR'.format(len(rcmds)))
         dfs = applyParallel(rcmds, edger, cores)
     else:
+        print('Running a pair-wise differential test through edgeR')
         dfs = [edger(rcmds)]
     de_dfs = {}
     for study in dfs:
