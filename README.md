@@ -25,11 +25,11 @@ The visualization aspect can be run on jupyter or the dataframe exported to the 
 web application. 
 
 If you want to use this tool to perform differential expression testing then there are some options:
-1. Run the tests within python using the rpy2 R interface, best when run on a multi-core machine. 
+1. Run the tests within python using the rpy2 R interface. For 200+ tests, use on a workstation (24+ cpu).
    
 2. If you have access to a HPC cluster an option to produce script files is available. This is 
-   probably the fastest compute option, but requires knowledge of a job scheduler and external
-   file manipulation. 
+   probably the fastest compute option, but requires knowledge of a job scheduler and a few 
+   extra steps. 
    
    Modify ```differential_expression.make_hpc_de_files``` with appropriate system paths.
    
