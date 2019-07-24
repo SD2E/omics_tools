@@ -15,7 +15,7 @@ ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz and extract to the data/ directo
 
 ### Installing
 
-pip install -I .
+pip install -I .  
 jupyter nbextension enable --py --sys-prefix widgetsnbextension  
 jupyter nbextension enable --py --sys-prefix clustergrammer_widget  
 
