@@ -166,7 +166,9 @@ def combine_annotations(go_df, kegg_df):
                                 t = go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study].merge(
                                     kegg_df[study][sign][['p.adjust']].T, how='right')
                                 t['study'] = study
-                                go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study] = t.values
+                                kegg_values = t.loc[:, kegg_df[study][sign].index]
+                                go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study,
+                                                       kegg_df[study][sign].index] = kegg_values.values
                 if study in go_df:
                     if sign in go_df[study]:
                         if not go_df[study][sign].empty:
@@ -174,7 +176,9 @@ def combine_annotations(go_df, kegg_df):
                             t = go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study].merge(
                                 go_df[study][sign][['p_fdr']].T, how='right')
                             t['study'] = study
-                            go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study] = t.values
+                            go_values = t.loc[:, go_df[study][sign].index]
+                            go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study,
+                                                   go_df[study][sign].index] = go_values.values
 
     c = np.zeros((len(studies), total_terms))
     for e, i in go_anno_padj['up'].iterrows():
@@ -186,13 +190,16 @@ def combine_annotations(go_df, kegg_df):
             # 'up' value exists
             for n, j in enumerate(i.values[1:]):
                 if 0 < j <= 0.05 and 0 < c[e][n] <= 0.05:
-                    # down and up are significant
+                    # Down and up are significant.
+                    # This seems impossible, but it occurs because the up-regulated and down-
+                    # regulated gene sets are separated prior to functional enrichment testing.
+                    # So different gene sets from the enriched pathway are affected up and down.
                     c[e][n] = np.inf
                 elif 0 < j <= 0.05 and c[e][n] > 0.05:
-                    # down is sig and up is not
+                    # Down is sig and up is not
                     c[e][n] = -j
                 elif j > 0.05 and 0 < c[e][n] <= 0.05:
-                    # down is not sig and up is
+                    # Down is not sig and up is
                     continue
     c[c == 0] = np.nan
     c_df = pd.DataFrame(c,
@@ -232,6 +239,8 @@ def check_data_files():
     gene2go = curdir + '/data/gene2go'
 
     if not os.path.exists(gene2go):
+        if not os.path.exists(curdir + '/data/'):
+            os.mkdir(curdir + '/data/')
         with open(gene2go +'.gz', 'wb') as f:
 
             print('INFO: downloading gene2go')
