@@ -96,7 +96,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         c_ = c_.replace(' ', '')
         name0  = '#' + c_
         edger0 = Rscript2(df_file, base_factor + sub_factors)
-        edger1 = 'group <- factor(c{0})'.format(tuple(groups_array))
+        edger1 = 'group <- factor(c{0})'.format(format_groups_array(groups_array))
         edger2 = 'y <- DGEList(counts=t_cts, group=group)'
         edger3 = 'y <- calcNormFactors(y)'
         edger4 = 'design <- model.matrix(~0 + group)'
@@ -119,8 +119,8 @@ def make_contrast_strings(comparison_indices, groups_array):
     for comp in comparison_indices:
         unrolled = comparison_indices[comp]
         indices = list(unrolled[0]) + list(unrolled[1])
-        group_a = [groups_array[int(j) - 1] for j in list(unrolled[0])]
-        group_b = [groups_array[int(j) - 1] for j in list(unrolled[1])]
+        group_a = [groups_array[int(j)] for j in list(unrolled[0])]
+        group_b = [groups_array[int(j)] for j in list(unrolled[1])]
         unrolled_digits = [0] * len(set(groups_array))
         for a in group_a:
             unrolled_digits[a - 1] = 1
