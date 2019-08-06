@@ -148,7 +148,6 @@ def Exec_script(e, run_dir='.'):
     return '''#!/usr/bin/env bash
 source /broad/software/scripts/useuse
 use R-3.5
-
 WD="{0}"
 RESULTS=$JOB_ID
 RUNDIR="$WD$RESULTS"
