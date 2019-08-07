@@ -24,7 +24,7 @@ DE_tests = [
     #['Strain1MG1655WT', 'Strain2MG1655GenomicPhlFGate'], #WT vs all
     #['Strain1MG1655WT', 'Strain3MG1655GenomicIcaRGate'],
     #['Strain1MG1655WT', 'Strain4MG1655GenomicNANDCircuit'],
-    ['Strain4MG1655GenomicNANDCircuit', 'Strain3MG1655GenomicIcaRGate']}#, #NAND vs IcaR genome
+    ['Strain4MG1655GenomicNANDCircuit', 'Strain3MG1655GenomicIcaRGate']] #, #NAND vs IcaR genome
     #['Strain4MG1655GenomicNANDCircuit', 'Strain2MG1655GenomicPhlFGate'], #NAND vs PhlF genome
     #['Strain4MG1655GenomicNANDCircuit', 'Strain4MG1655GenomicNANDCircuit']  #NAND vs NAND
 #]

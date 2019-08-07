@@ -229,7 +229,7 @@ def functional_annotations(go_df, kegg_df):
 
 def check_data_files():
     curdir = os.path.dirname(os.path.abspath(__file__))
-    gene2go = curdir + '/data/gene2go'
+    gene2go = curdir + '/data/gene2go.gz'
 
     if not os.path.exists(gene2go):
         with open(gene2go +'.gz', 'wb') as f:
