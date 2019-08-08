@@ -232,7 +232,7 @@ def check_data_files():
     gene2go = curdir + '/data/gene2go.gz'
 
     if not os.path.exists(gene2go):
-        with open(gene2go +'.gz', 'wb') as f:
+        with open(gene2go, 'wb') as f:
 
             print('INFO: downloading gene2go')
             ftp = ftplib.FTP(host='ftp.ncbi.nih.gov',
@@ -244,7 +244,7 @@ def check_data_files():
             ftp.quit
 
         print('INFO: extracting')
-        with gzip.open(gene2go + '.gz', 'rb') as f_in:
+        with gzip.open(gene2go, 'rb') as f_in:
             with open(gene2go, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
 
