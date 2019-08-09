@@ -2,7 +2,7 @@
   "name": "{{ agave.username }}-{{ app.name }}",
   "version": "{{ app.version }}",
   "executionType": "HPC",
-  "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}",
+  "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}-custom",
   "parallelism": "SERIAL",
   "deploymentPath": "{{ agave.username }}/apps/{{ app.bundle }}",
   "deploymentSystem": "data-sd2e-projects-users",
@@ -20,32 +20,33 @@
   "value": {
     "default": "agave://data-sd2e-community/sample/nsmblR_app/example_data.csv",
     "order": 0,
-    "required": false,
-    "visible": true
-    }
-  },
-  {
-  "id": "gene_names",
-  "value": {
-    "default": "agave://data-sd2e-community/sample/nsmblR_app/example_genes.csv",
-    "order": 0,
-    "required": false,
+    "required": true,
     "visible": true
     }
   }
   ],
   "parameters": [
-  {
-    "id": "organism",
+{
+    "id": "comparisons",
     "value": {
       "default": "E. coli",
-      "description": "Organism from which the gene counts were derived",
-      "type": "enumeration",
+      "description": "list of strains to compare",
+      "type": "array",
       "enumValues": ["Human", "E. coli", "Yeast"],
-      "visible": false,
+      "visible": true,
       "required": true
     }
   },{
+      "id": "factors",
+      "value": {
+        "default": "Timepoint",
+        "description": "list of metadata to use for comparisons",
+        "type": "enumeration",
+        "enumValues": ["Timepoint", "Temperature", "Arabinose", "IPTG"],
+        "visible": true,
+        "required": true
+      }
+    },{
     "id": "CONTAINER_IMAGE",
     "value": {
       "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",

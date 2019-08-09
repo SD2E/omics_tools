@@ -16,7 +16,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
                            r-base-dev \
                            libxml2-dev \
                            wget \
-			   rsync
+			                     rsync
 
 
 
@@ -28,7 +28,7 @@ RUN Rscript -e 'BiocManager::install("clusterProfiler")'
 ADD omics_tools /install/omics_tools
 RUN cd /install/omics_tools && \
           mkdir data && cd data && \
-          wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz 
+          wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz
 
 #/usr/local/lib/python3.6/dist-packages/omics_tools/data/Bacteria.gene_info
 COPY README.md setup.py requirements.txt /install/
@@ -37,11 +37,11 @@ RUN cd /install \
 
 
     # brittle to the location of they python install, there's definitely
-    # a better way to do this, should eventually by a paramater or seperate app 
+    # a better way to do this, should eventually by a paramater or seperate app
 RUN rsync -rltv /install/omics_tools/data /usr/local/lib/python3.6/dist-packages/omics_tools/ && \
     cd /usr/local/lib/python3.6/dist-packages/omics_tools/ && \
     python3 -c 'from annotate_GO_KEGG import check_data_files; check_data_files()' && \
-    gunzip /usr/local/lib/python3.6/dist-packages/omics_tools/data/gene2go.gz 
+    gunzip /usr/local/lib/python3.6/dist-packages/omics_tools/data/gene2go.gz
 
 RUN pip3 install fisher
 # Add test data

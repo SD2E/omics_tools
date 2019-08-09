@@ -5,7 +5,7 @@ from clustergrammer_widget import *
 from omics_tools import differential_expression, annotate_GO_KEGG, utils, comparison_generator
 
 
-def main(dataframe, comparisons):
+def main(dataframe, comparisons, factors):
     df = pd.read_csv(dataframe, index_col=0, header=None, low_memory=False).T
     df['IPTG'] = df['IPTG'].replace('', 0)
     #df['IPTG'] = ginkgo_df['IPTG'].astype(bool)
@@ -61,4 +61,4 @@ def main(dataframe, comparisons):
     net.cluster(dist_type='euclidean')
     net.widget()
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -16,6 +16,9 @@ fi
 # Usage: container_exec IMAGE COMMAND OPTIONS
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
+echo "gene counts is " ${gene_counts}
+echo "comparisons are " ${comparisions}
+echo "factors are " ${factors}
 
-echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /src/runtime_script.R --gene_counts ${gene_counts} --gene_names ${gene_names}
-DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /src/runtime_script.R --gene_counts ${gene_counts} --gene_names ${gene_names}
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}
+DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}

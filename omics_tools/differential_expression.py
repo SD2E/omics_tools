@@ -242,7 +242,7 @@ if (!requireNamespace("edgeR", quietly=TRUE))
 
 
 def run_edgeR(rcmds, cores=None):
-    check_installs()
+    #check_installs()
     if isinstance(rcmds, list):
         print('Running {} pair-wise differential tests through edgeR'.format(len(rcmds)))
         dfs = applyParallel(rcmds, edger, cores)
@@ -253,4 +253,3 @@ def run_edgeR(rcmds, cores=None):
     for study in dfs:
         de_dfs[study[1]] = study[0]
     return de_dfs
-

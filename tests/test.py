@@ -39,7 +39,7 @@ r_cmds = differential_expression.make_DE_cmds(
             sub_factors = sub_factors)
 print('Created {0} differential tests'.format(len(r_cmds)))
 
-deg_results = differential_expression.run_edgeR(r_cmds, cores=8)
+deg_results = differential_expression.run_edgeR(r_cmds, cores=24)
 
 KEGG_df = annotate_GO_KEGG.run_kegg(deg_results)
 with open('kegg_results.pkl', 'wb') as f:

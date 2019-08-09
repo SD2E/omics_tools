@@ -60,7 +60,7 @@ def go_anno(study, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05)
 
 
 def run_go(studies, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05, cores=None):
-    check_data_files()
+    #check_data_files()
     func = partial(go_anno, taxid=taxid, logFC=logFC, pval=pval, fdr=fdr, multi_fdr=multi_fdr)
     dfs = applyParallel(func, studies.items(), cores)
     go_dfs = {}
@@ -120,7 +120,7 @@ if (!requireNamespace("clusterProfiler", quietly = TRUE))
 
 
 def run_kegg(studies, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05, cores=None):
-    check_installs()
+    #check_installs()
     func = partial(kegg_anno, taxid=taxid, species=species, logFC=logFC, pval=pval, fdr=fdr)
     dfs = applyParallel(func, studies.items(), cores)
     kegg_dfs = {}
@@ -287,4 +287,3 @@ def check_data_files():
             shutil.copyfileobj(response, out_file)
 
         print('INFO: complete')
-
