@@ -107,6 +107,9 @@ sh $infile""".format(str(len(contrast_strings)))
 def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
          sub_factors=None, freedom=1, run_dir=None, tofile=False):
 
+    df_file = os.path.basename(utils.create_tempfile(dataframe))
+    dataframe.reset_index(drop=True, inplace=True)
+
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
 
@@ -114,7 +117,6 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
                                                                    sub_factors, freedom)
-    df_file = os.path.basename(utils.create_tempfile(dataframe))
     if run_dir:
         df_file = run_dir + df_file
 
@@ -126,7 +128,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         c_ = c_.replace(' ', '')
         name0  = '#' + c_
         edger0 = Rscript2(df_file, base_factor + sub_factors)
-        edger1 = 'group <- factor(c{0})'.format(format_groups_array(groups_array))
+        edger1 = format_groups_array(groups_array)
         edger2 = 'y <- DGEList(counts=t_cts, group=group)'
         edger3 = 'y <- calcNormFactors(y)'
         edger4 = 'design <- model.matrix(~0 + group)'
