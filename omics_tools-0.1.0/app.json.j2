@@ -1,0 +1,59 @@
+{
+  "name": "{{ agave.username }}-{{ app.name }}",
+  "version": "{{ app.version }}",
+  "executionType": "HPC",
+  "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}",
+  "parallelism": "SERIAL",
+  "deploymentPath": "{{ agave.username }}/apps/{{ app.bundle }}",
+  "deploymentSystem": "data-sd2e-projects-users",
+  "defaultProcessorsPerNode": 1,
+  "defaultNodeCount": 1,
+  "defaultQueue": "all",
+  "label": "{{ date_time.iso8601_micro }}",
+  "modules": ["load tacc-singularity"],
+  "shortDescription": "{{ app.description }}",
+  "templatePath": "runner-template.sh",
+  "testPath": "tester.sh",
+  "inputs": [
+  {
+  "id": "gene_counts",
+  "value": {
+    "default": "agave://data-sd2e-community/sample/nsmblR_app/example_data.csv",
+    "order": 0,
+    "required": false,
+    "visible": true
+    }
+  },
+  {
+  "id": "gene_names",
+  "value": {
+    "default": "agave://data-sd2e-community/sample/nsmblR_app/example_genes.csv",
+    "order": 0,
+    "required": false,
+    "visible": true
+    }
+  }
+  ],
+  "parameters": [
+  {
+    "id": "organism",
+    "value": {
+      "default": "E. coli",
+      "description": "Organism from which the gene counts were derived",
+      "type": "enumeration",
+      "enumValues": ["Human", "E. coli", "Yeast"],
+      "visible": false,
+      "required": true
+    }
+  },{
+    "id": "CONTAINER_IMAGE",
+    "value": {
+      "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",
+      "description": "Container Image. Do not edit.",
+      "type": "string",
+      "visible": false,
+      "required": true
+    }
+  }],
+  "outputs": []
+}
