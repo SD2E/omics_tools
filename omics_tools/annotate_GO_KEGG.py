@@ -60,7 +60,7 @@ def go_anno(study, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05)
 
 
 def run_go(studies, taxid=511145, logFC=0.5, pval=0.05, fdr=0.05, multi_fdr=0.05, cores=None):
-    check_data_files()
+    #check_data_files()
     func = partial(go_anno, taxid=taxid, logFC=logFC, pval=pval, fdr=fdr, multi_fdr=multi_fdr)
     dfs = applyParallel(func, studies.items(), cores)
     go_dfs = {}
@@ -120,7 +120,7 @@ if (!requireNamespace("clusterProfiler", quietly = TRUE))
 
 
 def run_kegg(studies, taxid=511145, species='eco', logFC=0.5, pval=0.05, fdr=0.05, cores=None):
-    check_installs()
+    #check_installs()
     func = partial(kegg_anno, taxid=taxid, species=species, logFC=logFC, pval=pval, fdr=fdr)
     dfs = applyParallel(func, studies.items(), cores)
     kegg_dfs = {}
@@ -166,7 +166,9 @@ def combine_annotations(go_df, kegg_df):
                                 t = go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study].merge(
                                     kegg_df[study][sign][['p.adjust']].T, how='right')
                                 t['study'] = study
-                                go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study] = t.values
+                                kegg_values = t.loc[:, kegg_df[study][sign].index]
+                                go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study,
+                                                       kegg_df[study][sign].index] = kegg_values.values
                 if study in go_df:
                     if sign in go_df[study]:
                         if not go_df[study][sign].empty:
@@ -174,7 +176,9 @@ def combine_annotations(go_df, kegg_df):
                             t = go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study].merge(
                                 go_df[study][sign][['p_fdr']].T, how='right')
                             t['study'] = study
-                            go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study] = t.values
+                            go_values = t.loc[:, go_df[study][sign].index]
+                            go_anno_padj[sign].loc[go_anno_padj[sign]['study'] == study,
+                                                   go_df[study][sign].index] = go_values.values
 
     c = np.zeros((len(studies), total_terms))
     for e, i in go_anno_padj['up'].iterrows():
@@ -186,13 +190,16 @@ def combine_annotations(go_df, kegg_df):
             # 'up' value exists
             for n, j in enumerate(i.values[1:]):
                 if 0 < j <= 0.05 and 0 < c[e][n] <= 0.05:
-                    # down and up are significant
+                    # Down and up are significant.
+                    # This seems impossible, but it occurs because the up-regulated and down-
+                    # regulated gene sets are separated prior to functional enrichment testing.
+                    # So different gene sets from the enriched pathway are affected up and down.
                     c[e][n] = np.inf
                 elif 0 < j <= 0.05 and c[e][n] > 0.05:
-                    # down is sig and up is not
+                    # Down is sig and up is not
                     c[e][n] = -j
                 elif j > 0.05 and 0 < c[e][n] <= 0.05:
-                    # down is not sig and up is
+                    # Down is not sig and up is
                     continue
     c[c == 0] = np.nan
     c_df = pd.DataFrame(c,
@@ -229,9 +236,11 @@ def functional_annotations(go_df, kegg_df):
 
 def check_data_files():
     curdir = os.path.dirname(os.path.abspath(__file__))
-    gene2go = curdir + '/data/gene2go'
+    gene2go = curdir + '/data/gene2go.gz'
 
     if not os.path.exists(gene2go):
+        if not os.path.exists(curdir + '/data/'):
+            os.mkdir(curdir + '/data/')
         with open(gene2go +'.gz', 'wb') as f:
 
             print('INFO: downloading gene2go')
@@ -244,7 +253,7 @@ def check_data_files():
             ftp.quit
 
         print('INFO: extracting')
-        with gzip.open(gene2go + '.gz', 'rb') as f_in:
+        with gzip.open(gene2go, 'rb') as f_in:
             with open(gene2go, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
 
@@ -287,4 +296,3 @@ def check_data_files():
             shutil.copyfileobj(response, out_file)
 
         print('INFO: complete')
-
