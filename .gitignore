@@ -4,3 +4,10 @@ dist/
 __pycache__/
 .ipynb*
 data/
+build/lib/omics_tools/__init__.py
+build/lib/omics_tools/annotate_GO_KEGG.py
+build/lib/omics_tools/comparison_generator.py
+build/lib/omics_tools/differential_expression.py
+build/lib/omics_tools/geneontology.py
+build/lib/omics_tools/plotly_plot.py
+build/lib/omics_tools/utils.py
