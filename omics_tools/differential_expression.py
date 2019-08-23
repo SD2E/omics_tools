@@ -43,8 +43,12 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     dataframe.reset_index(drop=True, inplace=True)
 
     df_file = os.path.basename(utils.create_tempfile(dataframe))
-    if not os.path.exists('./scripts/'):
-        os.mkdir('./scripts/')
+    if not os.path.exists(run_dir+'scripts/'):
+        os.mkdir(run_dir+'scripts/')
+
+    if not os.path.exists(run_dir+'results/'):
+        os.mkdir(run_dir+'results/')
+
 
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
@@ -118,7 +122,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
                                                                    sub_factors, freedom)
     if run_dir:
-        df_file = run_dir + df_file
+        df_file = run_dir  + df_file
 
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
@@ -151,13 +155,13 @@ def Exec_script(e, run_dir='.'):
 source /broad/software/scripts/useuse
 use R-3.5
 WD="{0}"
-RESULTS=$JOB_ID
+RESULTS={1}
 RUNDIR="$WD$RESULTS"
 mkdir $RUNDIR
 cd $RUNDIR
 
-Rscript $WD/scripts/dge_{1}.r > $WD/$RESULTS/dge_{1}_log.txt
-'''.format(run_dir, str(e))
+Rscript $WD/scripts/dge_{2}.r > $WD/$RESULTS/dge_{2}_log.txt
+'''.format(run_dir, 'results',str(e))
 
 
 def Rscript(count_fname, groups_array, factors=None):

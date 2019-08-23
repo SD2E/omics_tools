@@ -3,8 +3,8 @@ import os
 import numpy as np
 from itertools import combinations
 from collections import OrderedDict
-
-
+import json
+import ast
 def create_tempfile(df, fn=None):
     if fn:
         name = fn
@@ -347,3 +347,61 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=15
         print('Dataframe is empty, filters too stringent.')
     df.fillna(value=0, inplace=True)
     return df
+
+def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_col='strain_2'):
+    if not os.path.exists(run_dir+'/tmp/aggregate_dict.json'):
+        raise ValueError("Aggregate dict does not exist. Need to run comparison_generator.py first with aggregate_df=True")
+    with open(run_dir+'/tmp/aggregate_dict.json') as json_file:
+        agg_dict = json.load(json_file)
+    de_dfs = {}
+    de_results_dir=run_dir+'results/'
+    for f in os.listdir(de_results_dir):
+        if '-vs' in f:
+            # try:
+            df = pd.read_csv(de_results_dir + f,
+                                        delimiter=' ',
+                                        dtype={'logFC': 'float',
+                                               'logCPM': 'float',
+                                               'F': 'float',
+                                               'PValue': 'float',
+                                               'FDR': 'float'},
+                                        float_precision='round_trip')
+            df = df[cols_to_keep]
+            df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
+            group_dict = agg_dict[f].copy()
+            str_dict = json.dumps(_get_dict_subfactor_overlap(group_dict,subfactors))
+
+            if str_dict not in de_dfs:
+                de_dfs[str_dict] = {}
+                de_dfs[str_dict]['dfs'] = [df]
+                de_dfs[str_dict]['fname'] = [f]
+            else:
+                de_dfs[str_dict]['dfs'].append(df)
+                de_dfs[str_dict]['fname'].append(f)
+
+
+            # except Exception as e:
+            #     print('ERROR: ', e, f)
+
+    #Combine the dataframe lists
+    for key in de_dfs:
+        df_all = pd.concat(de_dfs[key]['dfs'], axis=1, join='outer',sort=True).fillna(0)
+        json_acceptable_string = key.replace("'", "\"")
+        new_dict = json.loads(json_acceptable_string)
+        for key2 in new_dict:
+            df_all[key2]=new_dict[key2]
+        de_dfs[key]['df_all']= df_all
+
+    massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
+    massive_df.to_csv(run_dir+'results/massive_df.csv')
+    # os.remove(run_dir+'tmp/aggregate_dict.json')
+    # os.rmdir(run_dir+'./tmp')
+    return massive_df
+
+def _get_dict_subfactor_overlap(group_dict,subfactors):
+    clean_dict = {}
+    for key in group_dict.keys():
+        key_temp = key[:-2]
+        if key_temp in subfactors:
+            clean_dict[key_temp] = group_dict[key]
+    return clean_dict
