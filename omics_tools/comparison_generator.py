@@ -1,9 +1,10 @@
 from itertools import product
 from functools import reduce
 import operator
+import os
+import json
 
-
-def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1):
+def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False):
     """
     :param df: pandas.DataFrame with all the experimental metadata and data.
     :param base_comparisons: List of list with two strings declaring base level comparisons.
@@ -21,11 +22,13 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
     comparisons = set()
     sub_factors = sorted(sub_factors)
     factors = base_factor + sub_factors
+    agg_dict = {}
     for base1, base2 in base_comparisons:
         factor_enums = [set(df[df[base_factor[0]] == base1][x]) for x in sub_factors]
         comparisons_1 = list(product(*factor_enums))
         factor_enums = [set(df[df[base_factor[0]] == base2][x]) for x in sub_factors]
         comparisons_2 = list(product(*factor_enums))
+
 
         for i in range(len(factors) - freedom, len(factors)):
             valids = []
@@ -48,6 +51,19 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
     comp_indices = {}
     for comp in comparisons:
         c1, c2 = comp[0], comp[1]
+        c1_str = '_'.join(map(lambda x: str(x), c1))
+        c2_str = '_'.join(map(lambda x: str(x), c2))
+        fname = c1_str+'-vs-'+c2_str+'.txt'
+
+        #create aggregated dataframe dictionary that will be written out to file
+        #dictionary is of the form {filename:dict(metadata)}
+        agg_dict[fname]={}
+
+        for kk in range(len(c1)):
+            agg_dict[fname][factors[kk]+'_1'] = c1[kk]
+        for kk in range(len(c2)):
+            agg_dict[fname][factors[kk]+'_2'] = c2[kk]
+
         c1_i = df[reduce(operator.and_, ((df[x] == c1[i]) for i, x in enumerate(factors)))].index
         c2_i = df[reduce(operator.and_, ((df[x] == c2[i]) for i, x in enumerate(factors)))].index
         if comp[::-1] in comp_indices:
@@ -58,4 +74,12 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
         if len(c1_i) == 1 or len(c2_i) == 1:
             continue
         comp_indices[tuple(map(tuple, comp))] = [c1_i, c2_i]
+
+    if aggregation_flag:
+        if not os.path.exists('./tmp/'):
+            os.mkdir('./tmp/')
+            with open('./tmp/aggregate_dict.json', 'w') as fp:
+                json.dump(agg_dict, fp)
+
     return comp_indices
+
