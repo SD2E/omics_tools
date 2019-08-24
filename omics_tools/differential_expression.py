@@ -35,11 +35,15 @@ def format_groups_array(groups_array):
 
 
 def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=None, base_factor=['strain'],
-         sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None):
+         sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False):
 
     sub_factors = sorted(sub_factors)
     if not isinstance(dataframe, pd.DataFrame):
         dataframe = utils.prepare_dataframe(data_frame_path, base_factor + sub_factors, metadata, transpose)
+
+    if filter_unused_base_factors:
+        dataframe = utils.remove_non_base_samples(dataframe,base_comparisons,base_factor)
+
     dataframe.reset_index(drop=True, inplace=True)
 
     df_file = os.path.basename(utils.create_tempfile(dataframe))

@@ -1,10 +1,10 @@
 import pandas as pd
 import os
 import numpy as np
-from itertools import combinations
+from itertools import combinations, chain
 from collections import OrderedDict
 import json
-import ast
+
 def create_tempfile(df, fn=None):
     if fn:
         name = fn
@@ -52,6 +52,10 @@ def load_DE_results(de_results_dir):
                 print('ERROR: ', e, f)
     return de_dfs
 
+def remove_non_base_samples(dataframe,factors,base_factor=['strain']):
+    merged = set(chain(*factors))
+    new_df = dataframe[dataframe[base_factor[0]].isin(merged)]
+    return new_df
 
 def prepare_dataframe(dataframe, factors=None, metadata=None, transpose=False):
     sfx = dataframe.split('.')[-1]
