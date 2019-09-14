@@ -3,7 +3,7 @@ from clustergrammer_widget import *
 import pickle
 from omics_tools import differential_expression, annotate_GO_KEGG, utils, comparison_generator
 
-ginkgo_data = '/tests/Reordered_ReadCountMatrix_preCAD.csv'
+ginkgo_data = 'tests/Reordered_ReadCountMatrix_preCAD.csv'
 
 ginkgo_df = pd.read_csv(ginkgo_data, index_col=0, header=None, low_memory=False).T
 ginkgo_df['strain'] = [x.split('/')[-2].replace('_','') for x in ginkgo_df['strain'].values]
@@ -33,39 +33,8 @@ groups_array = utils.group_by_factors(ginkgo_df, ['strain']+sub_factors)
 comparison_indices = comparison_generator.generate_comparisons(ginkgo_df, DE_tests, ['strain'], sub_factors, 1)
 contrast_strings = differential_expression.make_contrast_strings(comparison_indices, groups_array)
 
-r_cmds = differential_expression.make_DE_cmds(
-            dataframe = ginkgo_df,
-            base_comparisons = DE_tests,
-            sub_factors = sub_factors)
-print('Created {0} differential tests'.format(len(r_cmds)))
-
-deg_results = differential_expression.run_edgeR(r_cmds, cores=24)
-
-KEGG_df = annotate_GO_KEGG.run_kegg(deg_results)
-with open('kegg_results.pkl', 'wb') as f:
-    pickle.dump(KEGG_df, f)
-
-with open('kegg_results.pkl', 'rb') as f:
-    KEGG_df = pickle.load(f)
-
-GO_df = annotate_GO_KEGG.run_go(deg_results)
-with open('go_results.pkl', 'wb') as f:
-    pickle.dump(GO_df, f)
-with open('go_results.pkl', 'rb') as f:
-    GO_df = pickle.load(f)
-anno_df = annotate_GO_KEGG.combine_annotations(GO_df, KEGG_df)
-cg_file = 'new_results'
-factor_to_categories = utils.get_factor_categories(sub_factors, ginkgo_df)
-terms = annotate_GO_KEGG.functional_annotations(GO_df, KEGG_df)
-utils.create_clustergrammer_matrix_file(
-    annotated_dataframe = anno_df,
-    factor_to_categories = factor_to_categories,
-    terms = terms,
-    fname = cg_file)
-net = Network(clustergrammer_widget)
-net.load_file(cg_file + '.txt')
-cgdf = net.export_df()
-cgdf = utils.log10_conv(cgdf)
-net.load_df(cgdf)
-net.cluster(dist_type='euclidean')
-net.widget()
+differential_expression.make_hpc_de_files(
+    dataframe=ginkgo_df,
+    base_comparisons=DE_tests,
+    sub_factors=sub_factors,
+    run_dir='/Users/meslami/Desktop/DARPA/SD2/NovelChassis/noise_test',filter_unused_base_factors=True,export_tagwise_noise=True)
