@@ -35,7 +35,8 @@ def format_groups_array(groups_array):
 
 
 def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=None, base_factor=['strain'],
-         sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False):
+         sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False,
+                      export_tagwise_noise=False):
 
     sub_factors = sorted(sub_factors)
     if not isinstance(dataframe, pd.DataFrame):
@@ -63,16 +64,23 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
 
     files = open('./edgeR_files.txt', 'w')
     for e, c in enumerate(contrast_strings):
+        c_ = '-vs-'.join(['_'.join(map(str, x)) for x in c[0]])
+        c_ = c_.replace(' ', '')
         filt0 = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
         filt1 = 'y <- y[keep, ,]'
         filt2 = 'y <- estimateDisp(y, design)'
+        if export_tagwise_noise:
+            filt2a = 'df_noise <- data.frame("genes" = rownames(y$counts),"tag_noise"=y$tagwise.dispersion)'
+            filt2b = 'write.table(df_noise, file="{}_dispersion.txt",row.names=FALSE)'.format(c_)
         str0 = 'fit <- glmQLFit(y, design)'
         str1 = 'qlf <- glmQLFTest(fit, contrast={})'.format(c[1])
         str2 = 'tab <- topTags(qlf, n=Inf)'
-        c_ = '-vs-'.join(['_'.join(map(str, x)) for x in c[0]])
-        c_ = c_.replace(' ', '')
+
         str3 = 'write.table(tab, file="{}.txt")'.format(c_)
-        R_string = '\n'.join([filt0, filt1, filt2, str0, str1, str2, str3])
+        if not export_tagwise_noise:
+            R_string = '\n'.join([filt0, filt1, filt2, str0, str1, str2, str3])
+        else:
+            R_string = '\n'.join([filt0, filt1, filt2, filt2a,filt2b,str0, str1, str2, str3])
         fn = './scripts/dge_{}.r'.format(str(e))
         if run_dir:
             with open(fn, 'w') as of:

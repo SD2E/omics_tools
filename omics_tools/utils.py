@@ -358,9 +358,11 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
     with open(run_dir+'/tmp/aggregate_dict.json') as json_file:
         agg_dict = json.load(json_file)
     de_dfs = {}
+    noise_dfs = {}
     de_results_dir=run_dir+'results/'
+    noise_files_found=False
     for f in os.listdir(de_results_dir):
-        if '-vs' in f:
+        if ('-vs' in f) and ('dispersion' not in f):
             # try:
             df = pd.read_csv(de_results_dir + f,
                                         delimiter=' ',
@@ -386,6 +388,25 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
 
             # except Exception as e:
             #     print('ERROR: ', e, f)
+        if ('dispersion' in f):
+            f_n = f.replace('_dispersion','')
+            group_dict_noise = agg_dict[f_n].copy()
+            str_dict_noise = json.dumps(_get_dict_subfactor_overlap(group_dict_noise,subfactors))
+            noise_files_found = True
+            df_noise = pd.read_csv(de_results_dir+f,delimiter=' ',
+                                   dtype={'genes':'str','tag_noise':'float'},
+                                   float_precision='round_trip')
+            df_noise.set_index('genes',inplace=True)
+            df_noise.columns = [col + '_' + agg_dict[f_n][suffix_col] for col in df_noise.columns]
+            if 'NAND' in f:
+                print(df_noise)
+            if str_dict_noise not in noise_dfs:
+                noise_dfs[str_dict_noise]={}
+                noise_dfs[str_dict_noise]['dfs_noise']=[df_noise]
+                noise_dfs[str_dict_noise]['fname_noise']=[f]
+            else:
+                noise_dfs[str_dict_noise]['dfs_noise'].append(df_noise)
+                noise_dfs[str_dict_noise]['fname_noise'].append(f)
 
     #Combine the dataframe lists
     for key in de_dfs:
@@ -395,9 +416,21 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
         for key2 in new_dict:
             df_all[key2]=new_dict[key2]
         de_dfs[key]['df_all']= df_all
-
     massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
     massive_df.to_csv(run_dir+'results/massive_df.csv')
+    #If noise files are present then output those as well:
+    if noise_files_found:
+        # Combine the dataframe lists
+        for key in noise_dfs:
+            df_noise_all = pd.concat(noise_dfs[key]['dfs_noise'], axis=1, join='outer', sort=True).fillna(0)
+            json_acceptable_string = key.replace("'", "\"")
+            new_dict = json.loads(json_acceptable_string)
+            for key2 in new_dict:
+                df_noise_all[key2] = new_dict[key2]
+            noise_dfs[key]['df_noise_all'] = df_noise_all
+
+        massive_noise_df = pd.concat([noise_dfs[key]['df_noise_all'] for key in noise_dfs.keys()], sort=True)
+        massive_noise_df.to_csv(run_dir + 'results/massive_noise_df.csv')
     # os.remove(run_dir+'tmp/aggregate_dict.json')
     # os.rmdir(run_dir+'./tmp')
     return massive_df
