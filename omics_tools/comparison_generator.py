@@ -4,7 +4,7 @@ import operator
 import os
 import json
 
-def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False):
+def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False,run_dir=None):
     """
     :param df: pandas.DataFrame with all the experimental metadata and data.
     :param base_comparisons: List of list with two strings declaring base level comparisons.
@@ -76,9 +76,13 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
         comp_indices[tuple(map(tuple, comp))] = [c1_i, c2_i]
 
     if aggregation_flag:
-        if not os.path.exists('./tmp/'):
-            os.mkdir('./tmp/')
-            with open('./tmp/aggregate_dict.json', 'w') as fp:
+        if run_dir is None:
+            run_dir = os.getcwd()
+        if not os.path.exists(run_dir):
+            os.mkdir(run_dir)
+        if not os.path.exists(os.path.join(run_dir,'tmp')):
+            os.mkdir(os.path.join(run_dir,'tmp'))
+            with open(os.path.join(run_dir,'tmp','aggregate_dict.json'), 'w+') as fp:
                 json.dump(agg_dict, fp)
 
     return comp_indices
