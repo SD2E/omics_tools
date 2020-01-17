@@ -38,31 +38,48 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
          sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False,
                       export_tagwise_noise=False):
 
+    if run_dir is None:
+        run_dir = os.getcwd()
+
+    if not os.path.exists(run_dir):
+        os.mkdir(run_dir)
+
     sub_factors = sorted(sub_factors)
     if not isinstance(dataframe, pd.DataFrame):
         dataframe = utils.prepare_dataframe(data_frame_path, base_factor + sub_factors, metadata, transpose)
 
+    print('base factor')
+    print(base_factor)
+    print()
+    print()
+    print('base comparisons')
+    print(base_comparisons)
+
+
     if filter_unused_base_factors:
         dataframe = utils.remove_non_base_samples(dataframe,base_comparisons,base_factor)
 
+    print('dataframe size after filter',len(dataframe))
     dataframe.reset_index(drop=True, inplace=True)
 
-    df_file = os.path.basename(utils.create_tempfile(dataframe))
-    if not os.path.exists(run_dir+'scripts/'):
-        os.mkdir(run_dir+'scripts/')
+    df_file = os.path.basename(utils.create_tempfile(dataframe,os.path.join(run_dir,'edgeR_matfile.csv')))
 
-    if not os.path.exists(run_dir+'results/'):
-        os.mkdir(run_dir+'results/')
+
+    if not os.path.exists(os.path.join(run_dir,'scripts')):
+        os.mkdir(os.path.join(run_dir,'scripts'))
+
+    if not os.path.exists(os.path.join(run_dir,'results')):
+        os.mkdir(os.path.join(run_dir,'results'))
 
 
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom)
+                                                                   sub_factors, freedom,run_dir=run_dir)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
-    files = open('./edgeR_files.txt', 'w')
+    files = open(os.path.join(run_dir,'edgeR_files.txt'), 'w')
     for e, c in enumerate(contrast_strings):
         c_ = '-vs-'.join(['_'.join(map(str, x)) for x in c[0]])
         c_ = c_.replace(' ', '')
@@ -83,27 +100,34 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
             R_string = '\n'.join([filt0, filt1, filt2, filt2a,filt2b,str0, str1, str2, str3])
         fn = './scripts/dge_{}.r'.format(str(e))
         if run_dir:
-            with open(fn, 'w') as of:
-                of.write(Rscript(run_dir+df_file, groups_array, factors=base_factor + sub_factors))
+            fn = os.path.join(run_dir,fn[2:])
+            print(fn)
+            with open(fn, 'w+') as of:
+                of.write(Rscript(os.path.join(run_dir,df_file), groups_array, factors=base_factor + sub_factors))
                 of.write(R_string)
         else:
-            with open(fn, 'w') as of:
+            with open(fn, 'w+') as of:
                 of.write(Rscript(df_file, groups_array, factors=base_factor+sub_factors))
                 of.write(R_string)
         sh_fn = './scripts/dge_{}.sh'.format(str(e))
         if run_dir:
-            sh_fn = run_dir + '/scripts/dge_{}.sh'.format(str(e))
+            sh_fn = os.path.join(run_dir, 'scripts/dge_{}.sh'.format(str(e)))
         files.write(sh_fn + '\n')
         if run_dir:
             exec_script = Exec_script(e, run_dir)
         else:
             exec_script = Exec_script(e)
         script_file = './scripts/dge_{}.sh'.format(str(e))
-        with open(script_file, 'w') as of:
+        if run_dir:
+            script_file = os.path.join(run_dir,script_file[2:])
+        with open(script_file, 'w+') as of:
             of.write(exec_script)
     files.close()
-
-    with open('./dge_array.sh', 'w') as f:
+    if run_dir:
+        dge_array = os.path.join(run_dir,'dge_array.sh')
+    else:
+        dge_array = './dge_array.sh'
+    with open(dge_array, 'w+') as f:
         cmd = """# !/bin/bash
 # -t 1-{0}
 # -tc 36
@@ -173,7 +197,7 @@ mkdir $RUNDIR
 cd $RUNDIR
 
 Rscript $WD/scripts/dge_{2}.r > $WD/$RESULTS/dge_{2}_log.txt
-'''.format(run_dir, 'results',str(e))
+'''.format(run_dir+"/", 'results',str(e))
 
 
 def Rscript(count_fname, groups_array, factors=None):

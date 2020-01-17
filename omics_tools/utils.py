@@ -353,18 +353,18 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=15
     return df
 
 def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_col='strain_2'):
-    if not os.path.exists(run_dir+'/tmp/aggregate_dict.json'):
+    if not os.path.exists(os.path.join(run_dir,'tmp/aggregate_dict.json')):
         raise ValueError("Aggregate dict does not exist. Need to run comparison_generator.py first with aggregate_df=True")
-    with open(run_dir+'/tmp/aggregate_dict.json') as json_file:
+    with open(os.path.join(run_dir,'tmp/aggregate_dict.json')) as json_file:
         agg_dict = json.load(json_file)
     de_dfs = {}
     noise_dfs = {}
-    de_results_dir=run_dir+'results/'
+    de_results_dir=os.path.join(run_dir,'results')
     noise_files_found=False
     for f in os.listdir(de_results_dir):
         if ('-vs' in f) and ('dispersion' not in f):
             # try:
-            df = pd.read_csv(de_results_dir + f,
+            df = pd.read_csv(os.path.join(de_results_dir, f),
                                         delimiter=' ',
                                         dtype={'logFC': 'float',
                                                'logCPM': 'float',
@@ -393,7 +393,7 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             group_dict_noise = agg_dict[f_n].copy()
             str_dict_noise = json.dumps(_get_dict_subfactor_overlap(group_dict_noise,subfactors))
             noise_files_found = True
-            df_noise = pd.read_csv(de_results_dir+f,delimiter=' ',
+            df_noise = pd.read_csv(os.path.join(de_results_dir, f),delimiter=' ',
                                    dtype={'genes':'str','tag_noise':'float'},
                                    float_precision='round_trip')
             df_noise.set_index('genes',inplace=True)
@@ -417,7 +417,7 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             df_all[key2]=new_dict[key2]
         de_dfs[key]['df_all']= df_all
     massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
-    massive_df.to_csv(run_dir+'results/massive_df.csv')
+    massive_df.to_csv(os.path.join(run_dir,'results/massive_df.csv'))
     #If noise files are present then output those as well:
     if noise_files_found:
         # Combine the dataframe lists
@@ -430,7 +430,7 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             noise_dfs[key]['df_noise_all'] = df_noise_all
 
         massive_noise_df = pd.concat([noise_dfs[key]['df_noise_all'] for key in noise_dfs.keys()], sort=True)
-        massive_noise_df.to_csv(run_dir + 'results/massive_noise_df.csv')
+        massive_noise_df.to_csv(os.path.join(run_dir,'results/massive_noise_df.csv'))
     # os.remove(run_dir+'tmp/aggregate_dict.json')
     # os.rmdir(run_dir+'./tmp')
     return massive_df
