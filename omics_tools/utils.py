@@ -373,6 +373,7 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
                                                'FDR': 'float'},
                                         float_precision='round_trip')
             df = df[cols_to_keep]
+            df['log_FDR']=-1*np.log10(df['FDR'])
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
             group_dict = agg_dict[f].copy()
             str_dict = json.dumps(_get_dict_subfactor_overlap(group_dict,subfactors))
