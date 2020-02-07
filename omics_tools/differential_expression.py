@@ -48,12 +48,6 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     if not isinstance(dataframe, pd.DataFrame):
         dataframe = utils.prepare_dataframe(data_frame_path, base_factor + sub_factors, metadata, transpose)
 
-    print('base factor')
-    print(base_factor)
-    print()
-    print()
-    print('base comparisons')
-    print(base_comparisons)
 
 
     if filter_unused_base_factors:
@@ -83,7 +77,9 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     for e, c in enumerate(contrast_strings):
         c_ = '-vs-'.join(['_'.join(map(str, x)) for x in c[0]])
         c_ = c_.replace(' ', '')
-        filt0 = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
+        #fix indexing for R -- which is 1 based indexing
+        c_fixed = [x+1 for x in c[2]]
+        filt0 = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c_fixed), len(c_fixed))
         filt1 = 'y <- y[keep, ,]'
         filt2 = 'y <- estimateDisp(y, design)'
         if export_tagwise_noise:
@@ -172,8 +168,9 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
         edger2 = 'y <- DGEList(counts=t_cts, group=group)'
         edger3 = 'y <- calcNormFactors(y)'
         edger4 = 'design <- model.matrix(~0 + group)'
-
-        filt0  = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c[2]), len(c[2]))
+        #fix indexing for R -- which is 1 based indexing
+        c_fixed = [x+1 for x in c[2]]
+        filt0  = 'keep <- rowSums(cpm(y[, c{0}]) >1) >= {1}'.format(tuple(c_fixed), len(c_fixed))
         filt1  = 'y <- y[keep, ,]'
         filt2  = 'y <- estimateDisp(y, design)'
         str0   = 'fit <- glmQLFit(y, design)'
