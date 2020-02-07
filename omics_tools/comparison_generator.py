@@ -69,10 +69,13 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
         if comp[::-1] in comp_indices:
             continue
         if c1_i.empty or c2_i.empty:
+            print('Removing test', c1_str, 'vs', c2_str, 'because one of them is absent in the data')
             continue
         # This next test should never happen, we filter it out when constructing the initial DF
         if len(c1_i) == 1 or len(c2_i) == 1:
+            print('Removing test',c1_str,'vs',c2_str,'because there is only a single replicate')
             continue
+
         comp_indices[tuple(map(tuple, comp))] = [c1_i, c2_i]
 
     if aggregation_flag:
