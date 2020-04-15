@@ -20,5 +20,7 @@ echo "gene counts is " ${gene_counts}
 echo "comparisons are " ${comparisions}
 echo "factors are " ${factors}
 
-echo DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}
-DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}
+#echo DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}
+#DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /src/runtime.py ${gene_counts} ${comparisions} ${factors}
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /tests/test.py
+DEBUG=1 container_exec ${CONTAINER_IMAGE} python3 /tests/test.py

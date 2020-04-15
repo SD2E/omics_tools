@@ -42,8 +42,8 @@ def main(dataframe, comparisons, factors):
         pickle.dump(KEGG_df, f)
     with open('kegg_results.pkl', 'rb') as f:
         KEGG_df = pickle.load(f)
-     GO_df = annotate_GO_KEGG.run_go(deg_results)
-     anno_df = annotate_GO_KEGG.combine_annotations(GO_df, KEGG_df)
+    GO_df = annotate_GO_KEGG.run_go(deg_results)
+    anno_df = annotate_GO_KEGG.combine_annotations(GO_df, KEGG_df)
 
     cg_file = 'new_results'
     factor_to_categories = utils.get_factor_categories(sub_factors, ginkgo_df)

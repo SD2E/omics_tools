@@ -44,7 +44,8 @@ RUN rsync -rltv /install/omics_tools/data /usr/local/lib/python3.6/dist-packages
     gunzip /usr/local/lib/python3.6/dist-packages/omics_tools/data/gene2go.gz
 
 RUN pip3 install fisher
+RUN pip3 install --upgrade jupyter_client
 # Add test data
 ADD tests /tests
-#ADD src /src
-#RUN chmod +x /src/*
+ADD src /src
+RUN chmod +x /src/*
