@@ -1,0 +1,11 @@
+{
+  "name": "test_job",
+  "appId": "bgarcia-omics_tools-0.2.0",
+  "archive": true,
+  "archiveSystem": "data-tacc-work-bgarcia",
+  "archivePath": "omics_tools_test",
+  "archiveOnAppError": true,
+  "inputs": {
+   "gene_counts": "agave://data-sd2e-community/sample/omics_tools/Reordered_ReadCountMatrix_preCAD.csv"
+  }
+}

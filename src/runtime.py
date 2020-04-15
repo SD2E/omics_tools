@@ -4,61 +4,77 @@ import pickle
 from clustergrammer_widget import *
 from omics_tools import differential_expression, annotate_GO_KEGG, utils, comparison_generator
 
+def main(dataframe):
+    ginkgo_data = dataframe
 
-def main(dataframe, comparisons, factors):
-    df = pd.read_csv(dataframe, index_col=0, header=None, low_memory=False).T
-    df['IPTG'] = df['IPTG'].replace('', 0)
-    #df['IPTG'] = ginkgo_df['IPTG'].astype(bool)
-    df['Arabinose'] = df['Arabinose'].replace('', 0)
-    #ginkgo_df['Arabinose'] = df['Arabinose'].astype(bool)
-    #ginkgo_df['Timepoint'] = ginkgo_df['Timepoint'].replace(regex=':hour', value='')
+    ginkgo_df = pd.read_csv(ginkgo_data, index_col=0, header=None, low_memory=False).T
+    ginkgo_df['strain'] = [x.split('/')[-2].replace('_','') for x in ginkgo_df['strain'].values]
+    ginkgo_df.rename(columns={'timepoint':'Timepoint', 'temp': 'Temp'}, inplace=True)
+    ginkgo_df['IPTG'] = ginkgo_df['IPTG'].replace(' NA', 0)
+    ginkgo_df['IPTG'] = ginkgo_df['IPTG'].astype(bool)
+    ginkgo_df['Arabinose'] = ginkgo_df['Arabinose'].replace(' NA', 0)
+    ginkgo_df['Arabinose'] = ginkgo_df['Arabinose'].astype(bool)
+    ginkgo_df['Timepoint'] = ginkgo_df['Timepoint'].replace(regex=':hour', value='')
     ginkgo_df['Temp'] = ginkgo_df['Temp'].replace(regex=':celsius', value='')
     ginkgo_df.drop(['GinkgoID','R1','R2','filename','flags','library','gene_id'], axis=1, inplace=True)
-    for x in ['Temperature', 'Timepoint', 'Arabinose', 'IPTG']:
+    for x in ['Temp', 'Timepoint']:
         ginkgo_df[x] = pd.to_numeric(ginkgo_df[x]).astype('int64')
 
+    ginkgo_df['strain_inducer']=ginkgo_df['strain']+'_'+ginkgo_df['Arabinose'].map(str)+'_'+ginkgo_df['IPTG'].map(str)
 
-    sub_factors = ['Timepoint', 'Temp', 'Arabinose', 'IPTG']
+    # sub_factors = ['Timepoint', 'Temp', 'Arabinose', 'IPTG']
+    sub_factors = ['Timepoint', 'Temp']
+
+
     DE_tests = [
-        ['Strain1MG1655WT', 'Strain1MG1655WT'],
-        ['Strain1MG1655WT', 'Strain2MG1655GenomicPhlFGate'], #WT vs all
-        ['Strain1MG1655WT', 'Strain3MG1655GenomicIcaRGate'],
-        ['Strain1MG1655WT', 'Strain4MG1655GenomicNANDCircuit'],
-        ['Strain4MG1655GenomicNANDCircuit', 'Strain3MG1655GenomicIcaRGate'], #NAND vs IcaR genome
-        ['Strain4MG1655GenomicNANDCircuit', 'Strain2MG1655GenomicPhlFGate'], #NAND vs PhlF genome
-        ['Strain4MG1655GenomicNANDCircuit', 'Strain4MG1655GenomicNANDCircuit']  #NAND vs NAND
-        ]
-    groups_array = utils.group_by_factors(ginkgo_df, ['strain']+sub_factors)
-    comparison_indices = comparison_generator.generate_comparisons(ginkgo_df, DE_tests, ['strain'], sub_factors, 1)
-    contrast_strings = differential_expression.make_contrast_strings(comparison_indices, groups_array)
+        ['Strain1MG1655WT_False_False', 'Strain1MG1655WT_False_True'],
+        ['Strain1MG1655WT_False_False', 'Strain1MG1655WT_True_False'],
+        ['Strain1MG1655WT_False_False', 'Strain1MG1655WT_True_True'],
+    ]
+
+    ginkgo_df.reset_index(inplace=True)
+    groups_array = utils.group_by_factors(ginkgo_df, ['strain_inducer']+sub_factors)
+
+    # df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False,run_dir=None
+    comparison_indices = \
+        comparison_generator.generate_comparisons(ginkgo_df,
+                                                  base_comparisons= DE_tests,
+                                                  base_factor= ['strain_inducer'],
+                                                  sub_factors=sub_factors,
+                                                  freedom= 1,
+                                                  aggregation_flag=True,
+                                                  run_dir='.')
+    contrast_strings = \
+        differential_expression.make_contrast_strings(comparison_indices,
+                                                      groups_array)
+
+
     r_cmds = differential_expression.make_DE_cmds(
-    dataframe = ginkgo_df,
-    base_comparisons = DE_tests,
-    sub_factors = sub_factors)
+                dataframe = ginkgo_df,
+                base_comparisons = DE_tests,
+                sub_factors = sub_factors)
     print('Created {0} differential tests'.format(len(r_cmds)))
-    deg_results = differential_expression.run_edgeR(r_cmds, cores=8)
+
+    deg_results = differential_expression.run_edgeR(r_cmds, cores=24)
+
     KEGG_df = annotate_GO_KEGG.run_kegg(deg_results)
     with open('kegg_results.pkl', 'wb') as f:
         pickle.dump(KEGG_df, f)
+
     with open('kegg_results.pkl', 'rb') as f:
         KEGG_df = pickle.load(f)
-    GO_df = annotate_GO_KEGG.run_go(deg_results)
-    anno_df = annotate_GO_KEGG.combine_annotations(GO_df, KEGG_df)
 
-    cg_file = 'new_results'
-    factor_to_categories = utils.get_factor_categories(sub_factors, ginkgo_df)
-    terms = annotate_GO_KEGG.functional_annotations(GO_df, KEGG_df)
-    utils.create_clustergrammer_matrix_file(
-        annotated_dataframe = anno_df,
-        factor_to_categories = factor_to_categories,
-        terms = terms,
-        fname = cg_file)
-    net = Network(clustergrammer_widget)
-    net.load_file(cg_file + '.txt')
-    cgdf = net.export_df()
-    cgdf = utils.log10_conv(cgdf)
-    net.load_df(cgdf)
-    net.cluster(dist_type='euclidean')
-    net.widget()
+    GO_df = annotate_GO_KEGG.run_go(deg_results)
+    with open('go_results.pkl', 'wb') as f:
+        pickle.dump(GO_df, f)
+
+    differential_expression.make_hpc_de_files(
+        dataframe=ginkgo_df,
+        base_comparisons=DE_tests,
+        sub_factors=sub_factors,
+        run_dir='hpc_files',
+        filter_unused_base_factors=True,
+        export_tagwise_noise=False)
+
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1])
