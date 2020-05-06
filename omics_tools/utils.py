@@ -15,6 +15,13 @@ def create_tempfile(df, fn=None):
 
 
 def group_by_factors(dataframe, factors):
+    '''
+    returns a 1-based index of the R dataframe where each base factor + subfactor combination gets a unique index
+    and that index is repeated across replicates which will be grouped for the analysis
+    :param dataframe: counts dataframe
+    :param factors: list that combines the base factor and the subfactors
+    :return:
+    '''
     passed_qc_vals = dataframe.drop(factors, axis=1).values
     passed_qc_index = dataframe[factors].values
     passed_qc_cols = dataframe.drop(factors, axis=1).columns
@@ -352,7 +359,7 @@ def subset_df(df, strains=None, pivots=None, constants=None, pthresh=1, max_p=15
     df.fillna(value=0, inplace=True)
     return df
 
-def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_col='strain_2'):
+def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_col='strain_2',melt=False):
     if not os.path.exists(os.path.join(run_dir,'tmp/aggregate_dict.json')):
         raise ValueError("Aggregate dict does not exist. Need to run comparison_generator.py first with aggregate_df=True")
     with open(os.path.join(run_dir,'tmp/aggregate_dict.json')) as json_file:
@@ -373,7 +380,7 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
                                                'FDR': 'float'},
                                         float_precision='round_trip')
             df = df[cols_to_keep]
-            df['log_FDR']=-1*np.log10(df['FDR'])
+            df['nlogFDR']=-1*np.log10(df['FDR'])
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
             group_dict = agg_dict[f].copy()
             str_dict = json.dumps(_get_dict_subfactor_overlap(group_dict,subfactors))
@@ -434,6 +441,10 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
         massive_noise_df.to_csv(os.path.join(run_dir,'results/massive_noise_df.csv'))
     # os.remove(run_dir+'tmp/aggregate_dict.json')
     # os.rmdir(run_dir+'./tmp')
+
+    if melt:
+        pass
+
     return massive_df
 
 def _get_dict_subfactor_overlap(group_dict,subfactors):

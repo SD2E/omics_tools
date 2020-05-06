@@ -36,7 +36,7 @@ def format_groups_array(groups_array):
 
 def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=None, base_factor=['strain'],
          sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False,
-                      export_tagwise_noise=False):
+                      export_tagwise_noise=False, control_factor=None):
 
     if run_dir is None:
         run_dir = os.getcwd()
@@ -69,7 +69,7 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom,run_dir=run_dir)
+                                                                   sub_factors, freedom,run_dir=run_dir, control_factor=control_factor)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
