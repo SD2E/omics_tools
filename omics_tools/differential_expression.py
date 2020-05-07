@@ -121,8 +121,10 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     files.close()
     if run_dir:
         dge_array = os.path.join(run_dir,'dge_array.sh')
+        dge_local = os.path.join(run_dir, 'dge_local.sh')
     else:
         dge_array = './dge_array.sh'
+        dge_local = './dge_local.sh'
     with open(dge_array, 'w+') as f:
         cmd = """# !/bin/bash
 # -t 1-{0}
@@ -136,6 +138,17 @@ source /broad/software/scripts/useuse
 reuse UGER
 infile=$(awk "NR==$SGE_TASK_ID" /btl/foundry/users/alex/20190228_novel_chassis/run_DGE/edgeR_files.txt)
 sh $infile""".format(str(len(contrast_strings)))
+        f.write(cmd)
+
+    with open(dge_local, 'w+') as f:
+        cmd = """chmod -R 777 scripts/
+for i in {0.."""+str(len(contrast_strings)-1)+"}\n"+\
+"""do
+    echo i=$i
+    date
+    nohup ./scripts/dge_$i.sh &
+    date
+done"""
         f.write(cmd)
     return 0
 
