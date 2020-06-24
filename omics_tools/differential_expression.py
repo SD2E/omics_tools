@@ -36,7 +36,7 @@ def format_groups_array(groups_array):
 
 def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=None, base_factor=['strain'],
          sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False,
-                      export_tagwise_noise=False, control_factor=None):
+                      export_tagwise_noise=False, control_factor_in=None):
 
     if run_dir is None:
         run_dir = os.getcwd()

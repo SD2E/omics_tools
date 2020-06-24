@@ -371,7 +371,9 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
     for f in os.listdir(de_results_dir):
         if ('-vs' in f) and ('dispersion' not in f):
             # try:
-            df = pd.read_csv(os.path.join(de_results_dir, f),
+            fname = os.path.join(de_results_dir, f)
+            print('Reading:',fname)
+            df = pd.read_csv(fname,
                                         delimiter=' ',
                                         dtype={'logFC': 'float',
                                                'logCPM': 'float',

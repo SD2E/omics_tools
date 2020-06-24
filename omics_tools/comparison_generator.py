@@ -4,7 +4,7 @@ import operator
 import os
 import json
 
-def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False,run_dir=None,control_factor=None):
+def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_factors=None, freedom=1,aggregation_flag=False,run_dir=None,control_factor_in=None):
     """
     :param df: pandas.DataFrame with all the experimental metadata and data.
     :param base_comparisons: List of list with two strings declaring base level comparisons.
@@ -24,6 +24,10 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
     """
     comparisons = set()
     sub_factors = sorted(sub_factors)
+
+    control_factor = {}
+    for item in sub_factors:
+        control_factor[item]=control_factor_in[item]
     factors = base_factor + sub_factors
 
     if control_factor:
