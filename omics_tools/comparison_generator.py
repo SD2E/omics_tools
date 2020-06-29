@@ -17,7 +17,7 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
                                      ~ Strain1_time1_temp2 vs Strain2_time1_temp1
                                      ~ Strain1_time2_temp1 vs Strain2_time1_temp1
                                        etc.
-  :param control_factor: Dictionary of the format {subfactor:subfactor_value} to be used as the single control
+  :param control_factor_in: Dictionary of the format {subfactor:subfactor_value} to be used as the single control
                         {'timepoint':'time1','temperature':temp1}
                         note that all keys in the dictionary MUST be in the subfactor list.
     :return comparisons_indices:
