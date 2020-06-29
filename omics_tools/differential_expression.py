@@ -69,7 +69,7 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, data_frame_path=Non
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom,run_dir=run_dir, control_factor=control_factor)
+                                                                   sub_factors, freedom,run_dir=run_dir, control_factor_in=control_factor_in)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
 
