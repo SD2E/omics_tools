@@ -141,7 +141,8 @@ sh $infile""".format(str(len(contrast_strings)))
         f.write(cmd)
 
     with open(dge_local, 'w+') as f:
-        cmd = """chmod -R 777 scripts/
+        cmd = """#!/bin/bash\n
+chmod -R 777 scripts/
 for i in {0.."""+str(len(contrast_strings)-1)+"}\n"+\
 """do
     echo i=$i
@@ -164,11 +165,8 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
 
     sub_factors = sorted(sub_factors)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
-    print("calling comparison_generator.generate_comparisons")
-
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
                                                                    sub_factors, freedom, control_factor_in=control_factor_in)    
-    
     if run_dir:
         df_file = run_dir  + df_file
 
