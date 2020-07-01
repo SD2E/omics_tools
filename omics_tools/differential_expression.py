@@ -141,7 +141,8 @@ sh $infile""".format(str(len(contrast_strings)))
         f.write(cmd)
 
     with open(dge_local, 'w+') as f:
-        cmd = """chmod -R 777 scripts/
+        cmd = """#!/bin/bash\n
+chmod -R 777 scripts/
 for i in {0.."""+str(len(contrast_strings)-1)+"}\n"+\
 """do
     echo i=$i
@@ -154,7 +155,7 @@ done"""
 
 
 def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
-         sub_factors=None, freedom=1, run_dir=None, tofile=False):
+         sub_factors=None, freedom=1, run_dir=None, tofile=False, control_factor_in=None):
 
     df_file = os.path.basename(utils.create_tempfile(dataframe))
     dataframe.reset_index(drop=True, inplace=True)
@@ -165,7 +166,7 @@ def make_DE_cmds(dataframe=None, base_comparisons=None, base_factor=['strain'],
     sub_factors = sorted(sub_factors)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom)
+                                                                   sub_factors, freedom, control_factor_in=control_factor_in)    
     if run_dir:
         df_file = run_dir  + df_file
 
@@ -202,12 +203,12 @@ source /broad/software/scripts/useuse
 use R-3.5
 WD="{0}"
 RESULTS={1}
-RUNDIR="$WD$RESULTS"
+RUNDIR="$WD/$RESULTS"
 mkdir $RUNDIR
 cd $RUNDIR
 
 Rscript $WD/scripts/dge_{2}.r > $WD/$RESULTS/dge_{2}_log.txt
-'''.format(run_dir+"/", 'results',str(e))
+'''.format(run_dir, 'results',str(e))
 
 
 def Rscript(count_fname, groups_array, factors=None):

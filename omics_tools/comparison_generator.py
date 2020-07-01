@@ -74,6 +74,7 @@ def generate_comparisons(df, base_comparisons=None, base_factor=['strain'], sub_
         c1_str = '_'.join(map(lambda x: str(x), c1))
         c2_str = '_'.join(map(lambda x: str(x), c2))
         fname = c1_str+'-vs-'+c2_str+'.txt'
+        fname = fname.replace(' ', '')
 
         #create aggregated dataframe dictionary that will be written out to file
         #dictionary is of the form {filename:dict(metadata)}

@@ -374,13 +374,13 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             fname = os.path.join(de_results_dir, f)
             print('Reading:',fname)
             df = pd.read_csv(fname,
-                                        delimiter=' ',
-                                        dtype={'logFC': 'float',
-                                               'logCPM': 'float',
-                                               'F': 'float',
-                                               'PValue': 'float',
-                                               'FDR': 'float'},
-                                        float_precision='round_trip')
+            delimiter=' ',
+            dtype={'logFC': 'float',
+                   'logCPM': 'float',
+                   'F': 'float',
+                   'PValue': 'float',
+                   'FDR': 'float'},
+            float_precision='round_trip')
             df = df[cols_to_keep]
             df['nlogFDR']=-1*np.log10(df['FDR'])
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
