@@ -37,7 +37,7 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     #return df_test
     return df
     
-def main(counts_df_path):
+def main(counts_df_path, result_dir):
     if "29422" in counts_df_path:
         nand20 = False
     else:
@@ -120,7 +120,7 @@ def main(counts_df_path):
     counts_df_qcd.reset_index(inplace=True,drop=True)
     print("Unique strains: {}".format(len(counts_df_qcd['Strain'].unique())))
 
-    run_dir = os.getcwd() + "/../exp_ref_additive_design"
+    run_dir = os.path.join(os.getcwd(), result_dir)
     if not os.path.exists(run_dir):
         os.makedirs(run_dir)
     
@@ -153,7 +153,7 @@ def main(counts_df_path):
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
                                                   control_factor_in = control_factors)
-        os.chdir('../exp_ref_additive_design')
+        os.chdir(result_dir)
         print("new working dir: {}".format(os.getcwd()))
         subprocess.call(['chmod', 'u+x', './dge_local.sh'])
         ret_value = subprocess.call(['./dge_local.sh'])
@@ -191,5 +191,5 @@ def main(counts_df_path):
         df_diff_additive_design.to_csv(os.path.join(run_dir,'results/additive_design_df.csv'))
         
 if __name__ == '__main__':
-    #main("./experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv")
-    main("./experiment.ginkgo.23299_ReadCountMatrix_preCAD_transposed.csv")
+    #main("./experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
+    main("./experiment.ginkgo.23299_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
