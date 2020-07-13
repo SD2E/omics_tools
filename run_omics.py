@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import json
 import re
@@ -123,6 +124,8 @@ def main(counts_df_path, result_dir):
     run_dir = os.path.join(os.getcwd(), result_dir)
     if not os.path.exists(run_dir):
         os.makedirs(run_dir)
+        
+    # May need to remove content of the result_dir
     
     #groups_array = utils.group_by_factors(counts_df_qcd, factors_to_keep)
     
@@ -191,5 +194,15 @@ def main(counts_df_path, result_dir):
         df_diff_additive_design.to_csv(os.path.join(run_dir,'results/additive_design_df.csv'))
         
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_counts_file", help="input file")
+    parser.add_argument("--output_dir", help="results folder")
+
+    args = parser.parse_args()
+    arg_input_counts_file = args.input_counts_file
+    arg_output_dir = args.output_dir
+    
+    main(arg_input_counts_file, arg_output_dir)
+    
     #main("./experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
-    main("./experiment.ginkgo.23299_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
+    #main("./experiment.ginkgo.23299_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
