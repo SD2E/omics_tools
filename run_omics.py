@@ -120,10 +120,10 @@ def main(counts_df_path, result_dir):
     print("factors_to_keep: {}".format(factors_to_keep))
 
     for i in int_factors:
-        if "23299" in counts_df_path or "29422" in counts_df_path:
-            control_factors[i] = 5
-        else:
+        if "29422" in counts_df_path:
             control_factors[i] = 0
+        else:
+            control_factors[i] = 5
     for bf in bool_factors:
         control_factors[bf] = False
     for ff in float_factors:
