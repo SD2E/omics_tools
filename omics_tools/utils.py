@@ -398,8 +398,6 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
             group_dict = agg_dict[f].copy()
             str_dict = json.dumps(_get_dict_subfactor_overlap(group_dict,subfactors))
-            print(f)
-            print(str_dict)
             if str_dict not in de_dfs:
                 de_dfs[str_dict] = {}
                 de_dfs[str_dict]['dfs'] = [df]
@@ -441,6 +439,11 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             df_all[key2]=new_dict[key2]
         de_dfs[key]['df_all']= df_all
 
+    '''
+    TODO: This will break when comparing the same organism to itself. The problem is that I ASSUME a "unique" set of comparisons \
+    comparison_indices does NOT guarantee that and things will break because of a "Plan misalignment" error
+    which is basically when you have duplicate columns in a dataframe. This needs to be fixed.
+    '''
     massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
     massive_df.to_csv(os.path.join(run_dir,'results/massive_df.csv'))
     #If noise files are present then output those as well:

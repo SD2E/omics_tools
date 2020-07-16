@@ -24,15 +24,15 @@ sub_factors = ['Timepoint', 'Temp', 'Arabinose', 'IPTG']
 
 
 DE_tests = [
-    ['Strain1MG1655WT', 'Strain1MG1655WT']
+    ['Strain1MG1655WT', 'Strain2MG1655GenomicPhlFGate']
 ]
 run_dir='/Users/meslami/Desktop/test_remove'
 
-differential_expression.make_hpc_de_files(
-    dataframe=ginkgo_df,
-    base_comparisons=DE_tests,
-    sub_factors=sub_factors,
-    run_dir=run_dir,filter_unused_base_factors=True,export_tagwise_noise=False,aggregation_flag=True)
+# differential_expression.make_hpc_de_files(
+#     dataframe=ginkgo_df,
+#     base_comparisons=DE_tests,
+#     sub_factors=sub_factors,
+#     run_dir=run_dir,filter_unused_base_factors=True,export_tagwise_noise=False,aggregation_flag=True)
 
 
-# utils.aggregate_dataframes(run_dir,sub_factors)
+utils.aggregate_dataframes(run_dir,sub_factors)
