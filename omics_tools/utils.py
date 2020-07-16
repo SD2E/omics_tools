@@ -433,16 +433,13 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
 
     #Combine the dataframe lists
     for key in de_dfs:
-        print(key)
 
         df_all = pd.concat(de_dfs[key]['dfs'], axis=1, join='outer',sort=True).fillna(0)
-        print(df_all.columns)
         json_acceptable_string = key.replace("'", "\"")
         new_dict = json.loads(json_acceptable_string)
         for key2 in new_dict:
             df_all[key2]=new_dict[key2]
         de_dfs[key]['df_all']= df_all
-        # print(de_dfs[key]['df_all'].columns)
 
     massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
     massive_df.to_csv(os.path.join(run_dir,'results/massive_df.csv'))
