@@ -95,18 +95,30 @@ def main(counts_df_path, result_dir):
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PsrA_pPsrA_YFP'],
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_YFP']
             ]
+        control_factors = {}
     elif "29422" in counts_df_path:
         bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']  
         DE_tests = [['Bacillus subtilis 168 Marburg', 'Bacillus subtilis 168 Marburg']]
+        control_factors = {}
     elif "19606.19637.19708.19709" in counts_df_path:
         float_factors = ['IPTG', 'Arabinose']
         DE_tests = [['MG1655_empty_landing_pads', 'MG1655_NAND_Circuit']]
-
+        control_factors = {"strain":"MG1655_empty_landing_pads"}
+    elif "iterate" in counts_df_path:
+        bool_factors = ['IPTG_concentration', 'arabinose_concentration']
+        DE_tests = [
+            ['MG1655_WT','MG1655_WT'],
+            ['MG1655_WT','MG1655_empty_landing_pads'],
+            ['MG1655_WT','MG1655_IcaR_Gate'],
+            ['MG1655_WT','MG1655_PhlF_Gate'],
+            ['MG1655_WT','MG1655_NAND_Circuit']
+        ]
+        control_factors = {"strain": "MG1655_WT"}
+ 
     sub_factors = bool_factors + float_factors + int_factors   
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
 
-    control_factors = {}
     for i in int_factors:
         if "23299" in counts_df_path or "29422" in counts_df_path:
             control_factors[i] = 5
