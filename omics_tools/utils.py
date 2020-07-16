@@ -65,16 +65,17 @@ def remove_non_base_samples(dataframe,factors,base_factor=['strain']):
     return new_df
 
 def prepare_dataframe(dataframe, factors=None, metadata=None, transpose=False):
-    sfx = dataframe.split('.')[-1]
-    if 'csv' in sfx or 'txt' in sfx:
-        df = pd.read_csv(dataframe, index_col=0, header=None)
-    elif 'xlsx' in sfx:
-        df = pd.read_excel(dataframe)
-    elif 'json' in sfx:
-        df = pd.read_json(dataframe)
-    else:
-        raise('ERROR: Could not load dataframe ending with {0}'.format(sfx))
-
+    if isinstance(dataframe,str):
+        sfx = dataframe.split('.')[-1]
+        if 'csv' in sfx or 'txt' in sfx:
+            df = pd.read_csv(dataframe, index_col=0, header=None)
+        elif 'xlsx' in sfx:
+            df = pd.read_excel(dataframe)
+        elif 'json' in sfx:
+            df = pd.read_json(dataframe)
+        else:
+            raise('ERROR: Could not load dataframe ending with {0}'.format(sfx))
+    df = dataframe.copy()
     if transpose:
         df = df.T
 
@@ -102,9 +103,9 @@ def prepare_dataframe(dataframe, factors=None, metadata=None, transpose=False):
     if genelist:
         df[genelist] = df[genelist].apply(pd.to_numeric, errors='coerce')
 
-    df = df.apply(lambda x: x.str.replace('[^A-Za-z0-9\s]+', '') if x.dtype == "object" else x)
+    # df = df.apply(lambda x: x.str.replace('[^A-Za-z0-9\s]+', '') if x.dtype == "object" else x)
 
-    return df
+    return df,genelist
 
 
 def get_base_comparisons(dataframe, base_factor):
@@ -364,6 +365,10 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
         raise ValueError("Aggregate dict does not exist. Need to run comparison_generator.py first with aggregate_df=True")
     with open(os.path.join(run_dir,'tmp/aggregate_dict.json')) as json_file:
         agg_dict = json.load(json_file)
+
+    genes = pd.read_csv(os.path.join(run_dir,'genes.txt'))
+    genes['tmp']=1
+    genes.set_index('Gene',inplace=True)
     de_dfs = {}
     noise_dfs = {}
     de_results_dir=os.path.join(run_dir,'results')
@@ -381,12 +386,20 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
                    'PValue': 'float',
                    'FDR': 'float'},
             float_precision='round_trip')
+
             df = df[cols_to_keep]
             df['nlogFDR']=-1*np.log10(df['FDR'])
+
+            df['flag_edgeRremoved']=0
+            df = df.join(genes,how='outer')
+            df['flag_edgeRremoved']=df['flag_edgeRremoved'].fillna(1).astype(int)
+            df.fillna(0,inplace=True)
+            df.drop('tmp',inplace=True,axis=1)
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
             group_dict = agg_dict[f].copy()
             str_dict = json.dumps(_get_dict_subfactor_overlap(group_dict,subfactors))
-
+            print(f)
+            print(str_dict)
             if str_dict not in de_dfs:
                 de_dfs[str_dict] = {}
                 de_dfs[str_dict]['dfs'] = [df]
@@ -420,12 +433,17 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
 
     #Combine the dataframe lists
     for key in de_dfs:
+        print(key)
+
         df_all = pd.concat(de_dfs[key]['dfs'], axis=1, join='outer',sort=True).fillna(0)
+        print(df_all.columns)
         json_acceptable_string = key.replace("'", "\"")
         new_dict = json.loads(json_acceptable_string)
         for key2 in new_dict:
             df_all[key2]=new_dict[key2]
         de_dfs[key]['df_all']= df_all
+        # print(de_dfs[key]['df_all'].columns)
+
     massive_df = pd.concat([de_dfs[key]['df_all'] for key in de_dfs.keys()],sort=True)
     massive_df.to_csv(os.path.join(run_dir,'results/massive_df.csv'))
     #If noise files are present then output those as well:
