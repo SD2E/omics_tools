@@ -390,9 +390,9 @@ def aggregate_dataframes(run_dir,subfactors,cols_to_keep=['logFC','FDR'],suffix_
             df = df[cols_to_keep]
             df['nlogFDR']=-1*np.log10(df['FDR'])
 
-            df['flag_edgeRremoved']=0
+            df['flagedgeRremoved']=0
             df = df.join(genes,how='outer')
-            df['flag_edgeRremoved']=df['flag_edgeRremoved'].fillna(1).astype(int)
+            df['flagedgeRremoved']=df['flagedgeRremoved'].fillna(1).astype(int)
             df.fillna(0,inplace=True)
             df.drop('tmp',inplace=True,axis=1)
             df.columns = [col + '_' + agg_dict[f][suffix_col] for col in df.columns]
