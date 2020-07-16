@@ -39,17 +39,17 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     return df
     
 def main(counts_df_path, result_dir):
-    if "29422" in counts_df_path:
-        nand20 = False
-    else:
-        nand20 = True
+
     counts_df = pd.read_csv(counts_df_path, sep=',', low_memory=False)
     counts_df.rename({counts_df.columns[0]:'sample_id'},inplace=True,axis=1)
 
     print(counts_df.shape)
     base_factor = ['Strain']
 
-    if nand20:
+    int_factors = ['Timepoint']
+    bool_factors = float_factors = []
+
+    if "23299" in counts_df_path:
         # for 23299
         bool_factors=['IPTG','Arabinose']
         local_test = True
@@ -95,24 +95,28 @@ def main(counts_df_path, result_dir):
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PsrA_pPsrA_YFP'],
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_YFP']
             ]
-    else:
-        # for 29422
-        bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']
+    elif "29422" in counts_df_path:
+        bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']  
         DE_tests = [['Bacillus subtilis 168 Marburg', 'Bacillus subtilis 168 Marburg']]
-            
-    int_factors = ['Timepoint']
-    sub_factors = bool_factors + int_factors
+    elif "19606.19637.19708.19709" in counts_df_path:
+        float_factors = ['IPTG', 'Arabinose']
+        DE_tests = [['MG1655_empty_landing_pads', 'MG1655_NAND_Circuit']]
+
+    sub_factors = bool_factors + float_factors + int_factors   
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
 
     control_factors = {}
     for i in int_factors:
-        if nand20:
+        if "23299" in counts_df_path or "29422" in counts_df_path:
             control_factors[i] = 5
         else:
             control_factors[i] = 0
     for bf in bool_factors:
         control_factors[bf] = False
+    for ff in float_factors:
+        control_factors[ff] = 0
+        
     print("control_factors: {}".format(control_factors))
 
     counts_df_qcd = qc_update(counts_df, factors_to_keep, bool_factors, int_factors)
@@ -148,6 +152,7 @@ def main(counts_df_path, result_dir):
     gen_r_scripts = True
     if gen_r_scripts:
         differential_expression.make_hpc_de_files(dataframe = counts_df_qcd,
+#                                                  aggregation_flag = True,
                                                   base_comparisons = DE_tests,
                                                   sub_factors = sub_factors,
                                                   run_dir = run_dir,
