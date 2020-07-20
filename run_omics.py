@@ -103,7 +103,7 @@ def main(counts_df_path, result_dir):
     elif "19606.19637.19708.19709" in counts_df_path:
         float_factors = ['IPTG', 'Arabinose']
         DE_tests = [['MG1655_empty_landing_pads', 'MG1655_NAND_Circuit']]
-        control_factors = {"strain":"MG1655_empty_landing_pads"}
+        control_factors = {"Strain":"MG1655_empty_landing_pads"}
     elif "iterate" in counts_df_path:
         bool_factors = ['IPTG_concentration', 'arabinose_concentration']
         DE_tests = [
@@ -173,6 +173,7 @@ def main(counts_df_path, result_dir):
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
                                                   control_factor_in = control_factors)
+        exit(0)
         os.chdir(result_dir)
         print("new working dir: {}".format(os.getcwd()))
         subprocess.call(['chmod', 'u+x', './dge_local.sh'])
