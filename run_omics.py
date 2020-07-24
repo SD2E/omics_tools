@@ -33,7 +33,7 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     for col in df.columns:
         if col in int_cols:
             df[col]=df[col].astype(int)
-    df = pd.get_dummies(df,columns=['Timepoint'])
+    #df = pd.get_dummies(df,columns=['Timepoint'])
     #df_test = pd.get_dummies(df,columns=['Num_Index'])
     #return df_test
     return df
@@ -49,6 +49,7 @@ def main(counts_df_path, result_dir):
     int_factors = ['Timepoint']
     bool_factors = float_factors = []
 
+    add_one = True
     if "23299" in counts_df_path:
         # for 23299
         bool_factors=['IPTG','Arabinose']
@@ -96,9 +97,11 @@ def main(counts_df_path, result_dir):
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_YFP']
             ]
         control_factors = {}
-    elif "29422" in counts_df_path:
+        
+    elif "29422" in counts_df_path or "38250" in counts_df_path:
         bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']  
         DE_tests = [['Bacillus subtilis 168 Marburg', 'Bacillus subtilis 168 Marburg']]
+        add_one = False
         control_factors = {}
     elif "19606.19637.19708.19709" in counts_df_path:
         float_factors = ['IPTG', 'Arabinose']
@@ -150,7 +153,7 @@ def main(counts_df_path, result_dir):
                                                                    base_comparisons = DE_tests,
                                                                    base_factor = base_factor, 
                                                                    sub_factors = sub_factors,
-                                                                   freedom = len(sub_factors),
+                                                                   freedom = len(sub_factors)+1 if add_one else len(sub_factors),
                                                                    aggregation_flag = True,
                                                                    run_dir = run_dir,
                                                                    control_factor_in = control_factors)
@@ -169,11 +172,11 @@ def main(counts_df_path, result_dir):
                                                   sub_factors = sub_factors,
                                                   run_dir = run_dir,
                                                   filter_unused_base_factors = True,
-                                                  freedom = len(sub_factors),
+                                                  freedom = len(sub_factors)+1 if add_one else len(sub_factors),
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
                                                   control_factor_in = control_factors)
-        exit(0)
+
         os.chdir(result_dir)
         print("new working dir: {}".format(os.getcwd()))
         subprocess.call(['chmod', 'u+x', './dge_local.sh'])
@@ -200,12 +203,14 @@ def main(counts_df_path, result_dir):
         dfs=[]
         for test in DE_tests:
             strain_2 = test[1]
-            cols_of_interest = ['FDR_'+strain_2,'nlogFDR_'+strain_2,'logFC_'+strain_2]+sub_factors
+            cols_of_interest = ['flagedgeRremoved_'+strain_2,'FDR_'+strain_2,'nlogFDR_'+strain_2,'logFC_'+strain_2]+sub_factors
             df_sub = df_diff_exp[cols_of_interest]
             df_sub.rename({'FDR_'+strain_2:'FDR','nlogFDR_'+strain_2:'nlogFDR','logFC_'+strain_2:'logFC'},axis=1,inplace=True)
             df_sub['strain']=strain_2
             dfs.append(df_sub)
         df_diff_exp_all = pd.concat(dfs)
+        print("df_diff_exp_all")
+        print(df_diff_exp_all.head(5))
         df_diff_additive_design = create_additive_design(df_diff_exp_all, int_cols=bool_factors)
         print("df_diff_additive_design")
         print(df_diff_additive_design.head(5))
