@@ -33,23 +33,24 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     for col in df.columns:
         if col in int_cols:
             df[col]=df[col].astype(int)
-    df = pd.get_dummies(df,columns=['Timepoint'])
+    #df = pd.get_dummies(df,columns=['Timepoint'])
     #df_test = pd.get_dummies(df,columns=['Num_Index'])
     #return df_test
     return df
     
 def main(counts_df_path, result_dir):
-    if "29422" in counts_df_path:
-        nand20 = False
-    else:
-        nand20 = True
+
     counts_df = pd.read_csv(counts_df_path, sep=',', low_memory=False)
     counts_df.rename({counts_df.columns[0]:'sample_id'},inplace=True,axis=1)
 
     print(counts_df.shape)
     base_factor = ['Strain']
 
-    if nand20:
+    int_factors = ['Timepoint']
+    bool_factors = float_factors = []
+
+    add_one = True
+    if "23299" in counts_df_path:
         # for 23299
         bool_factors=['IPTG','Arabinose']
         local_test = True
@@ -95,24 +96,42 @@ def main(counts_df_path, result_dir):
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PsrA_pPsrA_YFP'],
                 ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_YFP']
             ]
-    else:
-        # for 29422
-        bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']
+        control_factors = {}
+        
+    elif "29422" in counts_df_path or "38250" in counts_df_path:
+        bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']  
         DE_tests = [['Bacillus subtilis 168 Marburg', 'Bacillus subtilis 168 Marburg']]
-            
-    int_factors = ['Timepoint']
-    sub_factors = bool_factors + int_factors
+        add_one = False
+        control_factors = {}
+    elif "19606.19637.19708.19709" in counts_df_path:
+        float_factors = ['IPTG', 'Arabinose']
+        DE_tests = [['MG1655_empty_landing_pads', 'MG1655_NAND_Circuit']]
+        control_factors = {"Strain":"MG1655_empty_landing_pads"}
+    elif "iterate" in counts_df_path:
+        bool_factors = ['IPTG_concentration', 'arabinose_concentration']
+        DE_tests = [
+            ['MG1655_WT','MG1655_WT'],
+            ['MG1655_WT','MG1655_empty_landing_pads'],
+            ['MG1655_WT','MG1655_IcaR_Gate'],
+            ['MG1655_WT','MG1655_PhlF_Gate'],
+            ['MG1655_WT','MG1655_NAND_Circuit']
+        ]
+        control_factors = {"strain": "MG1655_WT"}
+ 
+    sub_factors = bool_factors + float_factors + int_factors   
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
 
-    control_factors = {}
     for i in int_factors:
-        if nand20:
-            control_factors[i] = 5
-        else:
+        if "29422" in counts_df_path:
             control_factors[i] = 0
+        else:
+            control_factors[i] = 5
     for bf in bool_factors:
         control_factors[bf] = False
+    for ff in float_factors:
+        control_factors[ff] = 0
+        
     print("control_factors: {}".format(control_factors))
 
     counts_df_qcd = qc_update(counts_df, factors_to_keep, bool_factors, int_factors)
@@ -134,7 +153,7 @@ def main(counts_df_path, result_dir):
                                                                    base_comparisons = DE_tests,
                                                                    base_factor = base_factor, 
                                                                    sub_factors = sub_factors,
-                                                                   freedom = len(sub_factors),
+                                                                   freedom = len(sub_factors)+1 if add_one else len(sub_factors),
                                                                    aggregation_flag = True,
                                                                    run_dir = run_dir,
                                                                    control_factor_in = control_factors)
@@ -148,14 +167,16 @@ def main(counts_df_path, result_dir):
     gen_r_scripts = True
     if gen_r_scripts:
         differential_expression.make_hpc_de_files(dataframe = counts_df_qcd,
+#                                                  aggregation_flag = True,
                                                   base_comparisons = DE_tests,
                                                   sub_factors = sub_factors,
                                                   run_dir = run_dir,
                                                   filter_unused_base_factors = True,
-                                                  freedom = len(sub_factors),
+                                                  freedom = len(sub_factors)+1 if add_one else len(sub_factors),
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
                                                   control_factor_in = control_factors)
+
         os.chdir(result_dir)
         print("new working dir: {}".format(os.getcwd()))
         subprocess.call(['chmod', 'u+x', './dge_local.sh'])
@@ -182,12 +203,14 @@ def main(counts_df_path, result_dir):
         dfs=[]
         for test in DE_tests:
             strain_2 = test[1]
-            cols_of_interest = ['FDR_'+strain_2,'nlogFDR_'+strain_2,'logFC_'+strain_2]+sub_factors
+            cols_of_interest = ['flagedgeRremoved_'+strain_2,'FDR_'+strain_2,'nlogFDR_'+strain_2,'logFC_'+strain_2]+sub_factors
             df_sub = df_diff_exp[cols_of_interest]
             df_sub.rename({'FDR_'+strain_2:'FDR','nlogFDR_'+strain_2:'nlogFDR','logFC_'+strain_2:'logFC'},axis=1,inplace=True)
             df_sub['strain']=strain_2
             dfs.append(df_sub)
         df_diff_exp_all = pd.concat(dfs)
+        print("df_diff_exp_all")
+        print(df_diff_exp_all.head(5))
         df_diff_additive_design = create_additive_design(df_diff_exp_all, int_cols=bool_factors)
         print("df_diff_additive_design")
         print(df_diff_additive_design.head(5))
