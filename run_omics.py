@@ -11,7 +11,7 @@ from omics_tools import differential_expression, utils, comparison_generator
 from collections import Counter, defaultdict
 
 from multiprocessing import Pool, get_context
-import parallel_EMD
+import parallel_comparison
 
 import matplotlib.pyplot as plt
 
@@ -57,7 +57,7 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     #return df_test
     return df
 
-def emd_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='emd_heatmap'):
+def comparison_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='comparison_heatmap'):
     additional_conditions = []
     if replicates == True:
         additional_conditions.append('replicate')
@@ -86,10 +86,10 @@ def emd_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='em
 
     num_processors=os.cpu_count()
     pool = Pool(processes = num_processors)
-    output = pool.map(parallel_EMD.perform_matrix_calculation, execution_space)
+    output = pool.map(parallel_comparison.perform_matrix_calculation, execution_space)
     pool.close()
 
-    for emd_i,item in enumerate(execution_space):
+    for comparison_i,item in enumerate(execution_space):
         condition1,condition2,_pass = item
         data['condition1'].append(", ".join(map(str, condition1)))
         data['condition2'].append(", ".join(map(str, condition2)))
@@ -97,20 +97,20 @@ def emd_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='em
             data['{}_1'.format((exp_condition_cols + additional_conditions)[i])].append(condition1[i])
         for i,variable in enumerate(condition2):
             data['{}_2'.format((exp_condition_cols + additional_conditions)[i])].append(condition2[i])
-        data['EMD'].append(output[emd_i])
+        data['comparison'].append(output[comparison_i])
         data['condition1'].append(", ".join(map(str, condition2)))
         data['condition2'].append(", ".join(map(str, condition1)))
         for i,variable in enumerate(condition1):
             data['{}_1'.format((exp_condition_cols + additional_conditions)[i])].append(condition1[i])
         for i,variable in enumerate(condition2):
             data['{}_2'.format((exp_condition_cols + additional_conditions)[i])].append(condition2[i])
-        data['EMD'].append(output[emd_i])
+        data['comparison'].append(output[comparison_i])
 
     df = pd.DataFrame.from_dict(data)
     
     df = df.drop_duplicates()
 
-    pivoted_df = df.pivot('condition1','condition2','EMD')
+    pivoted_df = df.pivot('condition1','condition2','comparison')
 
     from matplotlib.colors import LinearSegmentedColormap
     plt.figure(figsize=(60, 60))
@@ -256,21 +256,16 @@ def main(counts_df_path, config_file, result_dir):
         print(df_diff_additive_design.head(5))
         df_diff_additive_design.to_csv(os.path.join(run_dir,'results/additive_design_df.csv'))
 
-        #hrm_data = df_diff_additive_design
-        #hrm_data.index.name = "gene"
-        #print("after adding index")
-        #print(hrm_data.head(5))
-        
-        hrm_data = pd.read_csv(os.path.join(run_dir,'results/additive_design_df.csv'), low_memory=False)
-        print("after load")
+        hrm_data = df_diff_additive_design.copy()
+        hrm_data["gene"] = hrm_data.index
+        print("after adding index")
         print(hrm_data.head(5))
-        hrm_data.rename(columns={"Unnamed: 0": "gene"}, inplace=True)
 
-        hrm_data.to_csv("hrm_data_before.csv")
+        #hrm_data.to_csv("hrm_data_before.csv")
 
         hrm_data = hrm_data[(hrm_data['FDR'] < fdr_max) & (hrm_data['logFC'] > log_fc_min)]
-        hrm_data.to_csv("hrm_data_after.csv")
-        output = emd_heatmap(hrm_data,hrm_experimental_condition_cols,replicates=False,figure_name=output_name)
+        #hrm_data.to_csv("hrm_data_after.csv")
+        output = comparison_heatmap(hrm_data,hrm_experimental_condition_cols,replicates=False,figure_name=output_name)
         output.to_csv(output_name + "_overlap.csv")
         print("output")
         print(output.head(5))
