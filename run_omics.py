@@ -1,12 +1,31 @@
 import argparse
 import pandas as pd
+import seaborn as sns
 import json
 import re
 import os
+import copy
 import subprocess
 import time
 from omics_tools import differential_expression, utils, comparison_generator
-from collections import Counter
+from collections import Counter, defaultdict
+
+from multiprocessing import Pool, get_context
+import parallel_comparison
+
+import matplotlib.pyplot as plt
+
+# requests prefers simplejson
+try:
+    import simplejson as json
+    from simplejson.errors import JSONDecodeError
+except ImportError:
+    import json
+    from json.decoder import JSONDecodeError
+
+#%matplotlib inline
+#import seaborn as sns
+#sns.set()
 
 def qc_update(df, factors_to_keep, bool_factors, int_factors):
     df = df[ (df['QC_gcorr_BOOL']==True) & (df['QC_nmap_BOOL']==True) ]
@@ -37,8 +56,100 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     #df_test = pd.get_dummies(df,columns=['Num_Index'])
     #return df_test
     return df
+
+def comparison_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='comparison_heatmap'):
+    additional_conditions = []
+    if replicates == True:
+        additional_conditions.append('replicate')
+        
+    print("exp_condition_cols: {}".format(exp_condition_cols))
     
-def main(counts_df_path, result_dir):
+    start = time.perf_counter()
+    prior_comparisons = set()
+    execution_space = list()
+    data = defaultdict(list)
+    condition_groups = cfm_input_df.groupby(exp_condition_cols + additional_conditions)
+    print("cfm_input_df")
+    print(cfm_input_df.head(5))
+    cols_of_interest0 = cfm_input_df[exp_condition_cols + additional_conditions].drop_duplicates()
+    sort_keys = exp_condition_cols + additional_conditions
+    cols_of_interest1 = cols_of_interest0.sort_values(sort_keys)
+    cols_of_interest = cols_of_interest1.values
+
+    for a,condition1 in enumerate(cols_of_interest):
+        for b,condition2 in enumerate(cols_of_interest):
+#             current_comparison = frozenset(Counter((a,b)))
+            if (a,b) not in prior_comparisons:
+                execution_space.append((condition1, condition2,condition_groups))
+                prior_comparisons.add((a,b))
+                prior_comparisons.add((b,a))
+
+    num_processors=os.cpu_count()
+    pool = Pool(processes = num_processors)
+    output = pool.map(parallel_comparison.perform_matrix_calculation, execution_space)
+    pool.close()
+
+    for comparison_i,item in enumerate(execution_space):
+        condition1,condition2,_pass = item
+        data['condition1'].append(", ".join(map(str, condition1)))
+        data['condition2'].append(", ".join(map(str, condition2)))
+        for i,variable in enumerate(condition1):
+            data['{}_1'.format((exp_condition_cols + additional_conditions)[i])].append(condition1[i])
+        for i,variable in enumerate(condition2):
+            data['{}_2'.format((exp_condition_cols + additional_conditions)[i])].append(condition2[i])
+        data['comparison'].append(output[comparison_i])
+        data['condition1'].append(", ".join(map(str, condition2)))
+        data['condition2'].append(", ".join(map(str, condition1)))
+        for i,variable in enumerate(condition1):
+            data['{}_1'.format((exp_condition_cols + additional_conditions)[i])].append(condition1[i])
+        for i,variable in enumerate(condition2):
+            data['{}_2'.format((exp_condition_cols + additional_conditions)[i])].append(condition2[i])
+        data['comparison'].append(output[comparison_i])
+
+    df = pd.DataFrame.from_dict(data)
+    
+    df = df.drop_duplicates()
+
+    pivoted_df = df.pivot('condition1','condition2','comparison')
+
+    from matplotlib.colors import LinearSegmentedColormap
+    plt.figure(figsize=(60, 60))
+    sns.heatmap(pivoted_df,linecolor='black',cmap=LinearSegmentedColormap.from_list('try1', ['red', 'white'], N=10))
+    b,t = plt.ylim()
+    b += 0.5
+    t -= 0.5
+    plt.ylim(b,t)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(figure_name + '.png')
+
+    stop = time.perf_counter()
+    print(stop-start)
+    return df
+
+def load_config(config_file):
+    try:
+        with open(config_file) as json_data:
+            config_json = json.load(json_data)
+    except Exception as e:
+        r.on_failure('Failed to load config_file', e)
+
+    int_factors = config_json["int_factors"] if "int_factors" in config_json else []
+    bool_factors = config_json["bool_factors"] if "bool_factors" in config_json else []
+    float_factors = config_json["float_factors"] if "float_factors" in config_json else []
+    other_factors = config_json["other_factors"] if "other_factors" in config_json else []
+    parts = config_json["parts"] if "parts" in config_json else []
+    hrm_experimental_condition_cols = int_factors + bool_factors + float_factors + other_factors + parts
+    control_factors = config_json["control_factors"] if "control_factors" in config_json else {}
+    cf_value = config_json["cf_value"]
+    DE_tests = config_json["DE_tests"]
+    add_one = config_json["add_one"]
+    fdr_max = config_json["fdr_max"]
+    log_fc_min = config_json["log_fc_min"]
+    output_name = config_json["output_name"]
+    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, output_name
+
+def main(counts_df_path, config_file, result_dir):
 
     counts_df = pd.read_csv(counts_df_path, sep=',', low_memory=False)
     counts_df.rename({counts_df.columns[0]:'sample_id'},inplace=True,axis=1)
@@ -46,87 +157,16 @@ def main(counts_df_path, result_dir):
     print(counts_df.shape)
     base_factor = ['Strain']
 
-    int_factors = ['Timepoint']
-    bool_factors = float_factors = []
-
-    add_one = True
-    if "23299" in counts_df_path:
-        # for 23299
-        bool_factors=['IPTG','Arabinose']
-        local_test = True
-        if local_test:
-            DE_tests = [
-                ['MG1655','MG1655_LPV3'],
-                ['MG1655','MG1655_LPV3_AraC_Sensor'],
-                ['MG1655','MG1655_LPV3_AraC_Sensor_pBADmin_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pPhlF_YFP']
-            ]
-        else:
-            DE_tests = [
-                ['MG1655','MG1655_LPV3'],
-                ['MG1655','MG1655_LPV3_AraC_Sensor'],
-                ['MG1655','MG1655_LPV3_AraC_Sensor_pBADmin_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pPhlF_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pTac_AmeR'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pTac_AmeR_pPhlF_pAmeR_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pTac_BM3R1'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pTac_BM3R1_pPhlF_pBM3R1_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PsrA'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PsrA_pPsrA_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PsrA_pTac_AmeR'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PsrA_pTac_AmeR_pPsrA_pAmeR_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pBADmin_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pTac_AmeR'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pTac_AmeR_pAmeR_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pTac_BM3R1'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pTac_BM3R1_pBM3R1_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_AraC_Sensors_pTac_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_AmeR'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_AmeR_pAmeR_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_BM3R1'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_BM3R1_pBM3R1_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PhlF'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PhlF_pPhlF_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PsrA'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_PsrA_pPsrA_YFP'],
-                ['MG1655','MG1655_LPV3_LacI_Sensor_pTac_YFP']
-            ]
-        control_factors = {}
-        
-    elif "29422" in counts_df_path or "38250" in counts_df_path:
-        bool_factors = ['IPTG', 'Cuminic_acid', 'Vanillic_acid', 'Xylose']  
-        DE_tests = [['Bacillus subtilis 168 Marburg', 'Bacillus subtilis 168 Marburg']]
-        add_one = False
-        control_factors = {}
-    elif "19606.19637.19708.19709" in counts_df_path:
-        float_factors = ['IPTG', 'Arabinose']
-        DE_tests = [['MG1655_empty_landing_pads', 'MG1655_NAND_Circuit']]
-        control_factors = {"Strain":"MG1655_empty_landing_pads"}
-    elif "iterate" in counts_df_path:
-        bool_factors = ['IPTG_concentration', 'arabinose_concentration']
-        DE_tests = [
-            ['MG1655_WT','MG1655_WT'],
-            ['MG1655_WT','MG1655_empty_landing_pads'],
-            ['MG1655_WT','MG1655_IcaR_Gate'],
-            ['MG1655_WT','MG1655_PhlF_Gate'],
-            ['MG1655_WT','MG1655_NAND_Circuit']
-        ]
-        control_factors = {"strain": "MG1655_WT"}
+    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, output_name = load_config(config_file)
+    print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
  
-    sub_factors = bool_factors + float_factors + int_factors   
+    sub_factors = int_factors + bool_factors + float_factors 
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
 
     for i in int_factors:
-        if "29422" in counts_df_path:
-            control_factors[i] = 0
-        else:
-            control_factors[i] = 5
+        control_factors[i] = cf_value
+
     for bf in bool_factors:
         control_factors[bf] = False
     for ff in float_factors:
@@ -215,17 +255,33 @@ def main(counts_df_path, result_dir):
         print("df_diff_additive_design")
         print(df_diff_additive_design.head(5))
         df_diff_additive_design.to_csv(os.path.join(run_dir,'results/additive_design_df.csv'))
+
+        hrm_data = df_diff_additive_design.copy()
+        hrm_data["gene"] = hrm_data.index
+        print("after adding index")
+        print(hrm_data.head(5))
+
+        #hrm_data.to_csv("hrm_data_before.csv")
+
+        hrm_data = hrm_data[(hrm_data['FDR'] < fdr_max) & (hrm_data['logFC'] > log_fc_min)]
+        #hrm_data.to_csv("hrm_data_after.csv")
+        output = comparison_heatmap(hrm_data,hrm_experimental_condition_cols,replicates=False,figure_name=output_name)
+        output.to_csv(output_name + "_overlap.csv")
+        print("output")
+        print(output.head(5))
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_counts_file", help="input file")
+    parser.add_argument("--config_file", help="analysis configuration")
     parser.add_argument("--output_dir", help="results folder")
 
     args = parser.parse_args()
     arg_input_counts_file = args.input_counts_file
+    arg_config_file = args.config_file
     arg_output_dir = args.output_dir
     
-    main(arg_input_counts_file, arg_output_dir)
+    main(arg_input_counts_file, arg_config_file, arg_output_dir)
     
     #main("./experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')
     #main("./experiment.ginkgo.23299_ReadCountMatrix_preCAD_transposed.csv", '../exp_ref_additive_design')

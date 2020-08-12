@@ -1,0 +1,45 @@
+{
+	"int_factors": [
+		"Timepoint"
+	],
+	"bool_factors": [
+		"IPTG_concentration",
+		"arabinose_concentration"
+	],
+	"other_factors": [
+		"part_wt",
+		"part_landing_pads",
+		"part_PhlF",
+		"part_IcaR"
+	],
+	"control_factors": {
+		"strain": "MG1655_WT"
+	},
+	"DE_tests": [
+		[
+			"MG1655_WT",
+			"MG1655_WT"
+		],
+		[
+			"MG1655_WT",
+			"MG1655_empty_landing_pads"
+		],
+		[
+			"MG1655_WT",
+			"MG1655_IcaR_Gate"
+		],
+		[
+			"MG1655_WT",
+			"MG1655_PhlF_Gate"
+		],
+		[
+			"MG1655_WT",
+			"MG1655_NAND_Circuit"
+		]
+	],
+	"add_one": true,
+	"cf_value": 5,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.1,
+	"output_name": "ecoli_iterate"
+}
