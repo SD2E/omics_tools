@@ -1,0 +1,22 @@
+{
+	"int_factors": [
+		"Timepoint"
+	],
+	"bool_factors": [
+		"IPTG",
+		"Cuminic_acid",
+		"Vanillic_acid",
+		"Xylose"
+	],
+	"DE_tests": [
+		[
+			"Bacillus subtilis 168 Marburg",
+			"Bacillus subtilis 168 Marburg"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"output_name": "bacillus"
+}

@@ -1,0 +1,23 @@
+{
+	"int_factors": [
+		"Timepoint"
+	],
+	"float_factors": [
+		"IPTG",
+		"Arabinose"
+	],
+	"control_factors": {
+		"Strain": "MG1655_empty_landing_pads"
+	},
+	"DE_tests": [
+		[
+			"MG1655_empty_landing_pads",
+			"MG1655_NAND_Circuit"
+		]
+	],
+	"add_one": true,
+	"cf_value": 5,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"output_name": "ecoli_titration"
+}
