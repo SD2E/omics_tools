@@ -132,7 +132,7 @@ def load_config(config_file):
         with open(config_file) as json_data:
             config_json = json.load(json_data)
     except Exception as e:
-        r.on_failure('Failed to load config_file', e)
+        print('Failed to load config_file', e)
 
     int_factors = config_json["int_factors"] if "int_factors" in config_json else []
     bool_factors = config_json["bool_factors"] if "bool_factors" in config_json else []
