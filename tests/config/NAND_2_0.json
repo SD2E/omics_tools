@@ -150,5 +150,6 @@
 	"cf_value": 5,
 	"fdr_max": 0.05,
 	"log_fc_min": 1.1,
+	"batch_delay": 14400,
 	"output_name": "ecoli_nand20"
 }

@@ -32,5 +32,7 @@
 	"add_one": true,
 	"cf_value": 5,
 	"fdr_max": 0.05,
-	"log_fc_min": 1.2 
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "ecoli_nand20"
 }

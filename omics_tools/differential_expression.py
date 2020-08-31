@@ -34,9 +34,20 @@ def format_groups_array(groups_array):
     return formatted_cmd
 
 
-def make_hpc_de_files(dataframe=None, base_comparisons=None, base_factor=['strain'],
-         sub_factors=None, freedom=1, metadata=None, transpose=False, run_dir=None,filter_unused_base_factors=False,
-                      export_tagwise_noise=False, control_factor_in=None,aggregation_flag=False):
+def make_hpc_de_files(dataframe=None, 
+                      base_comparisons=None, 
+                      base_factor=['strain'], 
+                      sub_factors=None, 
+                      freedom=1, 
+                      metadata=None, 
+                      transpose=False, 
+                      run_dir=None,
+                      filter_unused_base_factors=False,
+                      export_tagwise_noise=False, 
+                      control_factor_in=None,
+                      aggregation_flag=False,
+                      compute_nodes=24,
+                      batch_delay=1800):
 
     if run_dir is None:
         run_dir = os.getcwd()
@@ -72,8 +83,12 @@ def make_hpc_de_files(dataframe=None, base_comparisons=None, base_factor=['strai
 
     if not base_comparisons:
         base_comparisons = utils.get_base_comparisons(dataframe, base_factor)
-    comparison_indices = comparison_generator.generate_comparisons(dataframe, base_comparisons, base_factor,
-                                                                   sub_factors, freedom,run_dir=run_dir, control_factor_in=control_factor_in,
+    comparison_indices = comparison_generator.generate_comparisons(dataframe, 
+                                                                   base_comparisons, 
+                                                                   base_factor,
+                                                                   sub_factors, 
+                                                                   freedom,run_dir=run_dir, 
+                                                                   control_factor_in=control_factor_in,
                                                                    aggregation_flag=aggregation_flag)
     groups_array = utils.group_by_factors(dataframe, base_factor + sub_factors)
     contrast_strings = make_contrast_strings(comparison_indices, groups_array)
@@ -145,11 +160,29 @@ infile=$(awk "NR==$SGE_TASK_ID" /btl/foundry/users/alex/20190228_novel_chassis/r
 sh $infile""".format(str(len(contrast_strings)))
         f.write(cmd)
 
+    batches = int(len(contrast_strings) / compute_nodes)
+    last_batch_max = len(contrast_strings) % compute_nodes
     with open(dge_local, 'w+') as f:
         cmd = """#!/bin/bash\n
 chmod -R 777 scripts/
-for i in {0.."""+str(len(contrast_strings)-1)+"}\n"+\
-"""do
+let k=0
+for i in {0.."""+str(batches-1)+"""}
+do
+    for j in {0..""" +str(compute_nodes-1)+ """}
+    do
+       let k=$i*""" +str(compute_nodes)+ """+$j
+       echo k=$k
+       date
+       nohup ./scripts/dge_$k.sh &
+       date
+    done
+    sleep """ + str(batch_delay)+ """
+done
+"""
+        if len(contrast_strings) % compute_nodes > 0:
+            cmd += """\n
+for i in {""" +str(batches*compute_nodes)+ """..""" +str(len(contrast_strings)-1)+ """}
+do
     echo i=$i
     date
     nohup ./scripts/dge_$i.sh &
@@ -214,7 +247,6 @@ cd $RUNDIR
 
 Rscript $WD/scripts/dge_{2}.r > $WD/$RESULTS/dge_{2}_log.txt
 '''.format(run_dir, 'results',str(e))
-
 
 def Rscript(count_fname, groups_array, factors=None):
     cmd = """suppressMessages(library(edgeR))

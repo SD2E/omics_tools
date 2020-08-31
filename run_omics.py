@@ -146,8 +146,9 @@ def load_config(config_file):
     add_one = config_json["add_one"]
     fdr_max = config_json["fdr_max"]
     log_fc_min = config_json["log_fc_min"]
+    batch_delay = config_json["batch_delay"]
     output_name = config_json["output_name"]
-    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, output_name
+    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name
 
 def main(counts_df_path, config_file, result_dir):
 
@@ -157,7 +158,7 @@ def main(counts_df_path, config_file, result_dir):
     print(counts_df.shape)
     base_factor = ['Strain']
 
-    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, output_name = load_config(config_file)
+    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name = load_config(config_file)
     print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
  
     sub_factors = int_factors + bool_factors + float_factors 
@@ -215,7 +216,8 @@ def main(counts_df_path, config_file, result_dir):
                                                   freedom = len(sub_factors)+1 if add_one else len(sub_factors),
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
-                                                  control_factor_in = control_factors)
+                                                  control_factor_in = control_factors,
+                                                  batch_delay=batch_delay)
 
         os.chdir(result_dir)
         print("new working dir: {}".format(os.getcwd()))
