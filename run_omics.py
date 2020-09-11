@@ -57,7 +57,7 @@ def create_additive_design(df,int_cols=['IPTG','arabinose']):
     #return df_test
     return df
 
-def comparison_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_name='comparison_heatmap'):
+def comparison_heatmap(cfm_input_df, exp_condition_cols, target_column, replicates=True, figure_name='comparison_heatmap'):
     additional_conditions = []
     if replicates == True:
         additional_conditions.append('replicate')
@@ -80,7 +80,7 @@ def comparison_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_n
         for b,condition2 in enumerate(cols_of_interest):
 #             current_comparison = frozenset(Counter((a,b)))
             if (a,b) not in prior_comparisons:
-                execution_space.append((condition1, condition2,condition_groups))
+                execution_space.append((condition1, condition2, condition_groups, target_column))
                 prior_comparisons.add((a,b))
                 prior_comparisons.add((b,a))
 
@@ -90,7 +90,7 @@ def comparison_heatmap(cfm_input_df, exp_condition_cols,replicates=True,figure_n
     pool.close()
 
     for comparison_i,item in enumerate(execution_space):
-        condition1,condition2,_pass = item
+        condition1,condition2,_pass1,_pass2 = item
         data['condition1'].append(", ".join(map(str, condition1)))
         data['condition2'].append(", ".join(map(str, condition2)))
         for i,variable in enumerate(condition1):
@@ -148,7 +148,8 @@ def load_config(config_file):
     log_fc_min = config_json["log_fc_min"]
     batch_delay = config_json["batch_delay"]
     output_name = config_json["output_name"]
-    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name
+    comparison_target_column = config_json["comparison_target_column"]
+    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column
 
 def main(counts_df_path, config_file, result_dir):
 
@@ -158,7 +159,7 @@ def main(counts_df_path, config_file, result_dir):
     print(counts_df.shape)
     base_factor = ['Strain']
 
-    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name = load_config(config_file)
+    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column = load_config(config_file)
     print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
  
     sub_factors = int_factors + bool_factors + float_factors 
@@ -267,7 +268,7 @@ def main(counts_df_path, config_file, result_dir):
 
         hrm_data = hrm_data[(hrm_data['FDR'] < fdr_max) & (hrm_data['logFC'] > log_fc_min)]
         #hrm_data.to_csv("hrm_data_after.csv")
-        output = comparison_heatmap(hrm_data,hrm_experimental_condition_cols,replicates=False,figure_name=output_name)
+        output = comparison_heatmap(hrm_data,hrm_experimental_condition_cols,comparison_target_column,replicates=False,figure_name=output_name)
         output.to_csv(output_name + "_overlap.csv")
         print("output")
         print(output.head(5))

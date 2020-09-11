@@ -151,5 +151,6 @@
 	"fdr_max": 0.05,
 	"log_fc_min": 1.1,
 	"batch_delay": 14400,
-	"output_name": "ecoli_nand20"
+	"output_name": "ecoli_nand20",
+	"comparison_target_column": "gene"
 }
