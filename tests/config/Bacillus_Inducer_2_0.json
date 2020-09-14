@@ -19,5 +19,6 @@
 	"fdr_max": 0.05,
 	"log_fc_min": 1.2,
 	"batch_delay": 1800,
-	"output_name": "bacillus"
+	"output_name": "bacillus",
+	"comparison_target_column": "gene"
 }

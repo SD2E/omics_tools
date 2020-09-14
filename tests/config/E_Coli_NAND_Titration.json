@@ -20,5 +20,6 @@
 	"fdr_max": 0.05,
 	"log_fc_min": 1.2,
 	"batch_delay": 1800,
-	"output_name": "ecoli_titration"
+	"output_name": "ecoli_titration",
+	"comparison_target_column": "gene"
 }

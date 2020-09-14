@@ -1,8 +1,8 @@
 from scipy import stats
 
 
-def perform_matrix_calculation(condition_grouping,target_col='gene'):
-	condition1,condition2,grouped_df = condition_grouping
+def perform_matrix_calculation(condition_grouping):
+	condition1,condition2,grouped_df,target_col = condition_grouping
 	comparison = 0
 	if target_col == 'BL1-A_MEFL':
 		comparison = compute_EMD(grouped_df, condition1, condition2, target_col)
