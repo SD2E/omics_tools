@@ -3,6 +3,7 @@ dist/
 *egg-info
 __pycache__/
 .ipynb*
+.project
 data/
 build/lib/omics_tools/__init__.py
 build/lib/omics_tools/annotate_GO_KEGG.py
