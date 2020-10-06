@@ -149,7 +149,11 @@ def load_config(config_file):
     batch_delay = config_json["batch_delay"]
     output_name = config_json["output_name"]
     comparison_target_column = config_json["comparison_target_column"]
-    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column
+    if 'base_factor' in config_json:
+        base_factor = [config_json['base_factor']]
+    else:
+        base_factor = None
+    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor
 
 def main(counts_df_path, config_file, result_dir):
 
@@ -157,11 +161,12 @@ def main(counts_df_path, config_file, result_dir):
     counts_df.rename({counts_df.columns[0]:'sample_id'},inplace=True,axis=1)
 
     print(counts_df.shape)
-    base_factor = ['Strain']
 
-    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column = load_config(config_file)
+
+    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor = load_config(config_file)
     print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
- 
+    if not base_factor:
+        base_factor = ['Strain']
     sub_factors = int_factors + bool_factors + float_factors 
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
@@ -171,8 +176,8 @@ def main(counts_df_path, config_file, result_dir):
 
     for bf in bool_factors:
         control_factors[bf] = False
-    for ff in float_factors:
-        control_factors[ff] = 0
+    # for ff in float_factors:
+    #     control_factors[ff] = 0
         
     print("control_factors: {}".format(control_factors))
 
@@ -180,7 +185,10 @@ def main(counts_df_path, config_file, result_dir):
     print(counts_df_qcd.shape)
     print(counts_df_qcd.head(5))
     counts_df_qcd.reset_index(inplace=True,drop=True)
-    print("Unique strains: {}".format(len(counts_df_qcd['Strain'].unique())))
+    try:
+        print("Unique strains: {}".format(len(counts_df_qcd['Strain'].unique())))
+    except:
+        print('No column named Strain')
 
     run_dir = os.path.join(os.getcwd(), result_dir)
     if not os.path.exists(run_dir):
