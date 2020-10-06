@@ -246,11 +246,12 @@ def main(counts_df_path, config_file, result_dir):
         while True:
             result_files = [f for f in os.listdir('./results') if re.match(r'^(?!dge).*$', f)]
             if len(result_files) < len(comparison_indices):
-                time.sleep(10)
+                #time.sleep(10)
+                pass
             else:
                 break
 
-        df_diff_exp = utils.aggregate_dataframes(run_dir, sub_factors, suffix_col='Strain_2')
+        df_diff_exp = utils.aggregate_dataframes(run_dir, sub_factors, suffix_col=base_factor+'_2')
         dfs=[]
         for test in DE_tests:
             strain_2 = test[1]
