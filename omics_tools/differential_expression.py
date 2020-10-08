@@ -178,7 +178,8 @@ do
     done
     sleep """ + str(batch_delay)+ """
 done
-"""
+""" if batches > 0 else """#!/bin/bash\n
+chmod -R 777 scripts/"""
         if len(contrast_strings) % compute_nodes > 0:
             cmd += """\n
 for i in {""" +str(batches*compute_nodes)+ """..""" +str(len(contrast_strings)-1)+ """}
