@@ -251,7 +251,7 @@ def main(counts_df_path, config_file, result_dir):
             else:
                 break
 
-        df_diff_exp = utils.aggregate_dataframes(run_dir, sub_factors, suffix_col=base_factor+'_2')
+        df_diff_exp = utils.aggregate_dataframes(run_dir, sub_factors, suffix_col=base_factor[0]+'_2')
         dfs=[]
         for test in DE_tests:
             strain_2 = test[1]
