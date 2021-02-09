@@ -1,14 +1,14 @@
 {
 	"int_factors": [
-		"Timepoint"
+		"timepoint"
 	],
 	"bool_factors": [
 		"IPTG"
 	],
 	"control_factors": {
-		"strain": "Escherichia_coli_Nissle_WT",
-		"timepoint": 5.0,
-		"IPTG_concentration": false
+		"Strain": "Escherichia_coli_Nissle_WT",
+		"timepoint": 23,
+		"IPTG": false
 	},
 	"DE_tests": [
 		[
