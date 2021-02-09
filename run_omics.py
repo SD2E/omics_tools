@@ -28,7 +28,7 @@ except ImportError:
 #sns.set()
 
 def qc_update(df, factors_to_keep, bool_factors, int_factors):
-    df = df[ (df['QC_gcorr_BOOL']==True) & (df['QC_nmap_BOOL']==True) ]
+    df = df[ (df['qc_gcorr_bool']==True) & (df['qc_nmap_bool']==True) ]
 
     patterns_to_filter = ["qc_", "_unit", "_input_state"]
     columns_to_filter = ["replicate", "sample_id", "temperature", "timepoint"]
