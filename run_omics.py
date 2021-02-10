@@ -173,7 +173,8 @@ def main(counts_df_path, config_file, result_dir):
     print("factors_to_keep: {}".format(factors_to_keep))
 
     for i in int_factors:
-        control_factors[i] = cf_value
+        if i not in control_factors:
+            control_factors[i] = cf_value
 
     for bf in bool_factors:
         control_factors[bf] = False
