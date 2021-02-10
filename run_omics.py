@@ -31,7 +31,7 @@ def qc_update(df, factors_to_keep, bool_factors, int_factors):
     df = df[ (df['qc_gcorr_bool']==True) & (df['qc_nmap_bool']==True) ]
 
     patterns_to_filter = ["qc_", "_unit", "_input_state"]
-    columns_to_filter = ["replicate", "sample_id", "temperature", "timepoint"]
+    columns_to_filter = ["replicate", "sample_id", "temperature", "timepoint","dextrose"]
     for col in df.columns:
         if col not in factors_to_keep and (any(p in col.lower() for p in patterns_to_filter) or col.lower() in columns_to_filter):
             df.drop(col, axis=1, inplace=True)
