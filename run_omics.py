@@ -28,10 +28,10 @@ except ImportError:
 #sns.set()
 
 def qc_update(df, factors_to_keep, bool_factors, int_factors):
-    df = df[ (df['QC_gcorr_BOOL']==True) & (df['QC_nmap_BOOL']==True) ]
+    df = df[ (df['qc_gcorr_bool']==True) & (df['qc_nmap_bool']==True) ]
 
     patterns_to_filter = ["qc_", "_unit", "_input_state"]
-    columns_to_filter = ["replicate", "sample_id", "temperature", "timepoint"]
+    columns_to_filter = ["replicate", "sample_id", "temperature", "timepoint","dextrose"]
     for col in df.columns:
         if col not in factors_to_keep and (any(p in col.lower() for p in patterns_to_filter) or col.lower() in columns_to_filter):
             df.drop(col, axis=1, inplace=True)
@@ -45,7 +45,7 @@ def qc_update(df, factors_to_keep, bool_factors, int_factors):
 
     return df
 
-def create_additive_design(df,int_cols=['IPTG','arabinose']):
+def create_additive_design(df,int_cols=['iptg','arabinose']):
     #genes = set(df.index)
     #genes_index = pd.DataFrame(list(range(len(genes))),columns=['Num_Index'],index=genes)
     #df = df.join(genes_index)
@@ -159,6 +159,7 @@ def main(counts_df_path, config_file, result_dir):
 
     counts_df = pd.read_csv(counts_df_path, sep=',', low_memory=False)
     counts_df.rename({counts_df.columns[0]:'sample_id'},inplace=True,axis=1)
+    counts_df.rename({col: str.lower(col) for col in counts_df.columns},inplace=True, axis=1)
 
     print(counts_df.shape)
 
@@ -166,13 +167,14 @@ def main(counts_df_path, config_file, result_dir):
     int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor = load_config(config_file)
     print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
     if not base_factor:
-        base_factor = ['Strain']
+        base_factor = ['strain']
     sub_factors = int_factors + bool_factors + float_factors 
     factors_to_keep = base_factor + sub_factors
     print("factors_to_keep: {}".format(factors_to_keep))
 
     for i in int_factors:
-        control_factors[i] = cf_value
+        if i not in control_factors:
+            control_factors[i] = cf_value
 
     for bf in bool_factors:
         control_factors[bf] = False
@@ -186,9 +188,9 @@ def main(counts_df_path, config_file, result_dir):
     print(counts_df_qcd.head(5))
     counts_df_qcd.reset_index(inplace=True,drop=True)
     try:
-        print("Unique strains: {}".format(len(counts_df_qcd['Strain'].unique())))
+        print("Unique strains: {}".format(len(counts_df_qcd['strain'].unique())))
     except:
-        print('No column named Strain')
+        print('No column named strain')
 
     run_dir = os.path.join(os.getcwd(), result_dir)
     if not os.path.exists(run_dir):
