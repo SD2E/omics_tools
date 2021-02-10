@@ -56,7 +56,7 @@
 			"EcN_NOTgate_PhlF"
 		]
 	],
-	"add_one": false,
+	"add_one": true,
 	"cf_value": 0,
 	"fdr_max": 0.05,
 	"log_fc_min": 1.2,

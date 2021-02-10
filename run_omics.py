@@ -259,7 +259,7 @@ def main(counts_df_path, config_file, result_dir):
             strain_2 = test[1]
             cols_of_interest = ['flagedgeRremoved_'+strain_2,'FDR_'+strain_2,'nlogFDR_'+strain_2,'logFC_'+strain_2]+sub_factors
             df_sub = df_diff_exp[cols_of_interest]
-            df_sub.rename({'FDR_'+strain_2:'FDR','nlogFDR_'+strain_2:'nlogFDR','logFC_'+strain_2:'logFC'},axis=1,inplace=True)
+            df_sub.rename({'FDR_'+strain_2:'FDR','nlogFDR_'+strain_2:'nlogFDR','logFC_'+strain_2:'logFC','flagedgeRremoved_'+strain_2:'flagedgeRremoved'},axis=1,inplace=True)
             df_sub['strain']=strain_2
             dfs.append(df_sub)
         df_diff_exp_all = pd.concat(dfs)
