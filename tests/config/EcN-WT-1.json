@@ -13,6 +13,10 @@
 	"DE_tests": [
 		[
 			"Escherichia_coli_Nissle_WT",
+			"Escherichia_coli_Nissle_WT"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
 			"EcN_SensorArrayOnly"
 		],
 		[
