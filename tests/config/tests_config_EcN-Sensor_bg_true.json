@@ -1,0 +1,66 @@
+{
+	"int_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"iptg"
+	],
+	"control_factors": {
+		"strain": "EcN_SensorArrayOnly",
+		"timepoint": 23,
+		"iptg": true
+	},
+	"DE_tests": [
+		[
+			"EcN_SensorArrayOnly",
+			"Escherichia_coli_Nissle_WT"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_PsrA"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_HlyIIR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_BM3R1"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_AmtR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_QacR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_LitR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_AmeR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_IcaR"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_BetI"
+		],
+		[
+			"EcN_SensorArrayOnly",
+			"EcN_NOTgate_PhlF"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "EcN",
+	"comparison_target_column": "gene"
+}
