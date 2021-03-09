@@ -177,7 +177,8 @@ def main(counts_df_path, config_file, result_dir):
             control_factors[i] = cf_value
 
     for bf in bool_factors:
-        control_factors[bf] = False
+        if bf not in control_factors:
+            control_factors[bf] = False
     # for ff in float_factors:
     #     control_factors[ff] = 0
         
