@@ -1,0 +1,66 @@
+{
+	"int_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"iptg"
+	],
+	"control_factors": {
+		"strain": "Escherichia_coli_Nissle_WT",
+		"timepoint": 23,
+		"iptg": true
+	},
+	"DE_tests": [
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_SensorArrayOnly"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_PsrA"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_HlyIIR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_BM3R1"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_AmtR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_QacR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_LitR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_AmeR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_IcaR"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_BetI"
+		],
+		[
+			"Escherichia_coli_Nissle_WT",
+			"EcN_NOTgate_PhlF"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "EcN",
+	"comparison_target_column": "gene"
+}
