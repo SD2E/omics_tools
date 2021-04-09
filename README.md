@@ -57,6 +57,8 @@ Git
 ### Authors
 
 * Alexander Cristofaro
+* Mohammed Eslami
+* George Zheng
 
 ### License
 
