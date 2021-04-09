@@ -1,6 +1,6 @@
 # Omics dashboard
 
-Perform differential expression tests for RNASeq and visualize results with tunable 
+Perform differential expression tests for RNASeq at scale with a configurable interface and visualize results with tunable 
 control over p-value thresholds.
 
 ## Getting started
@@ -35,6 +35,11 @@ You can find example config files in ```tests/config```. Here is an example of e
 
 ```python omics_tools/run_omics.py --input_counts_file omics_tools/tests/data/experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv --config_file omics_tools/tests/config/Bacillus_Inducer_1_0.json --output_dir test_new```
 
+All output files will be generated in the "results" folder. Outputs will include:
+1. One txt file per comparison, named with the metadata.
+2. A file called `massive_df.csv` which is a wide dataframe of all comparisons and FDRs. Each column is named with the comparison.
+3. A file called `additive_design_df.csv` where it is a long representation of (2)
+
 
 ### Deployment
 
@@ -57,6 +62,8 @@ Git
 ### Authors
 
 * Alexander Cristofaro
+* Mohammed Eslami
+* George Zheng
 
 ### License
 
