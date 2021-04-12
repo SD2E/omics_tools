@@ -1,0 +1,39 @@
+{
+	"bool_factors": [
+		"iptg",
+		"arabinose"
+	],
+	"DE_tests": [
+		[
+			"MG1655",
+			"MG1655_LPV3"
+		],
+		[
+			"MG1655",
+			"MG1655_LPV3_AraC_Sensor"
+		],
+		[
+			"MG1655",
+			"MG1655_LPV3_AraC_Sensor_pBADmin_YFP"
+		],
+		[
+			"MG1655",
+			"MG1655_LPV3_LacI_AraC_Sensors"
+		],
+		[
+			"MG1655",
+			"MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF"
+		],
+		[
+			"MG1655",
+			"MG1655_LPV3_LacI_AraC_Sensors_pBADmin_PhlF_pPhlF_YFP"
+		]
+	],
+	"add_one": true,
+	"cf_value": 5,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "ecoli_nand20",
+	"comparison_target_column": "gene"
+}

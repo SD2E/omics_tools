@@ -1,0 +1,59 @@
+./precomputed-data-table-omics-toolsheroic-squid.ipcexe: line 47: module: command not found
+./precomputed-data-table-omics-toolsheroic-squid.ipcexe: line 59: activate: No such file or directory
+which: no singularity in (/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/taco/.local/bin:/home/taco/bin)
+./scripts/dge_2.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_7.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_0.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_5.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_1.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_6.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_4.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_2.sh: line 3: use: command not found
+./scripts/dge_1.sh: line 3: use: command not found
+./scripts/dge_7.sh: line 3: use: command not found
+./scripts/dge_0.sh: line 3: use: command not found
+./scripts/dge_5.sh: line 3: use: command not found
+./scripts/dge_4.sh: line 3: use: command not found
+./scripts/dge_6.sh: line 3: use: command not found
+./scripts/dge_3.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_8.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_3.sh: line 3: use: command not found
+./scripts/dge_8.sh: line 3: use: command not found
+./scripts/dge_9.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_9.sh: line 3: use: command not found
+./scripts/dge_10.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_10.sh: line 3: use: command not found
+./scripts/dge_11.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_11.sh: line 3: use: command not found
+./scripts/dge_12.sh: line 2: /broad/software/scripts/useuse: No such file or directory
+./scripts/dge_12.sh: line 3: use: command not found
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: mkdir: cannot create directory ‘/data/./results’cannot create directory ‘/data/./results’: File exists
+: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: mkdir: cannot create directory ‘/data/./results’cannot create directory ‘/data/./results’: File exists: File exists
+
+mkdir: cannot create directory ‘/data/./results’: File exists
+mkdir: cannot create directory ‘/data/./results’: File exists
+/opt/conda/envs/omics_tools/lib/python3.7/site-packages/pandas/core/frame.py:3940: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  errors=errors)
+/src/omics_tools/run_omics.py:41: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  df[col] = df[col].astype(bool)
+/src/omics_tools/run_omics.py:44: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  df[col] = pd.to_numeric(df[col]).astype('int64')

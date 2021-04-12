@@ -1,0 +1,29 @@
+{
+	"float_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"iptg_concentration",
+		"arabinose_concentration"
+	],
+	"control_factors": {
+		"strain": "MG1655_WT",
+		"timepoint": 5.0,
+		"IPTG_concentration": false,
+		"arabinose_concentration": false
+	},
+	"DE_tests": [
+		[
+			"MG1655_WT",
+			"MG1655_WT"
+		]
+	],
+	"add_one": true,
+	"cf_value": 5,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.1,
+	"batch_delay": 1800,
+	"output_name": "ecoli_iterate",
+	"comparison_target_column": "gene",
+	"base_factor":"strain"
+}

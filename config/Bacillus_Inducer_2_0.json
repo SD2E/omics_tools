@@ -1,0 +1,24 @@
+{
+	"int_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"iptg",
+		"cuminic_acid",
+		"vanillic_acid",
+		"xylose"
+	],
+	"DE_tests": [
+		[
+			"Bacillus subtilis 168 Marburg",
+			"Bacillus subtilis 168 Marburg"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "bacillus",
+	"comparison_target_column": "gene"
+}
