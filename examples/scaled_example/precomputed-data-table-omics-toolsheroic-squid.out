@@ -1,0 +1,205 @@
+activate omics_tools
+launching omics_tools
+
+setting to docker
+hey, it's docker
+Pulling sd2e/precomputed-data-table-omics-tools:0.1.3. Set NO_PULL=1 to prevent this.
+docker run OPTS CONTAINER_IMAGE COMMAND PARAMS: --rm --user=0:1002 -v /data/jobs/sd2eadm/job-556a6a54-b537-4729-a968-ca8e99ab1675-007-precomputed-data-table-omics-toolsheroic-squid:/data:rw -w /data sd2e/precomputed-data-table-omics-tools:0.1.3 /opt/conda/envs/omics_tools/bin/python3 /src/omics_tools/run_omics.py --input_counts_file experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv --config_file /src/omics_tools/tests/config/Bacillus_Inducer_1_0.json --output_dir .
+(60, 4302)
+hrm_experimental_condition_cols: ['timepoint', 'iptg', 'cuminic_acid', 'vanillic_acid', 'xylose']
+factors_to_keep: ['strain', 'timepoint', 'iptg', 'cuminic_acid', 'vanillic_acid', 'xylose']
+control_factors: {'timepoint': 0, 'iptg': False, 'cuminic_acid': False, 'vanillic_acid': False, 'xylose': False}
+(49, 4272)
+   arabinose  cds c-terminal fragment  cuminic_acid  ...  znuc  zur   zwf
+0          0                        0         False  ...    52  428  5434
+1          0                        0         False  ...    58  198  4425
+2          0                        0          True  ...    47  206  2928
+3          0                        0         False  ...    85  346  4722
+4          0                        0         False  ...    62  253  5222
+
+[5 rows x 4272 columns]
+Unique strains: 1
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_True_False because there is only a single replicate
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_True_True because one of them is absent in the data
+len(comparison_indices): 13
+dataframe size after filter 49
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_Falsei=0
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=1
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=2
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=3
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=4
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=5
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=6
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=7
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=8
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=9
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=10
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=11
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+i=12
+Fri Apr  9 17:42:55 UTC 2021
+Fri Apr  9 17:42:55 UTC 2021
+ vs Bacillus subtilis 168 Marburg_False_True_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_5_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_True_False because there is only a single replicate
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_5_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_0_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_False_18_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_0_False_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_False_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_18_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_0_True_False because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_False_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_False_True_18_True_True because one of them is absent in the data
+Removing test Bacillus subtilis 168 Marburg_False_False_0_False_False vs Bacillus subtilis 168 Marburg_True_True_5_True_True because one of them is absent in the data
+/data/./scripts/dge_0.r
+/data/./scripts/dge_1.r
+/data/./scripts/dge_2.r
+/data/./scripts/dge_3.r
+/data/./scripts/dge_4.r
+/data/./scripts/dge_5.r
+/data/./scripts/dge_6.r
+/data/./scripts/dge_7.r
+/data/./scripts/dge_8.r
+/data/./scripts/dge_9.r
+/data/./scripts/dge_10.r
+/data/./scripts/dge_11.r
+/data/./scripts/dge_12.r
+new working dir: /data
+ret_value: 0
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_18_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_5_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_True_True_18_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_18_False_True.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_True_5_True_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_True_5_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_True_True_5_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_18_True_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_5_True_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_True_False_5_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_False_5_False_True.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_True_False_18_False_False.txt
+Reading: /data/./results/Bacillussubtilis168Marburg_False_False_0_False_False-vs-Bacillussubtilis168Marburg_False_True_18_False_False.txt
+df_diff_exp_all
+      flagedgeRremoved_Bacillus subtilis 168 Marburg  ...                         strain
+aacd                                               0  ...  Bacillus subtilis 168 Marburg
+aadk                                               0  ...  Bacillus subtilis 168 Marburg
+aag                                                0  ...  Bacillus subtilis 168 Marburg
+aapa                                               0  ...  Bacillus subtilis 168 Marburg
+abba                                               0  ...  Bacillus subtilis 168 Marburg
+
+[5 rows x 10 columns]
+df_diff_additive_design
+      flagedgeRremoved_Bacillus subtilis 168 Marburg  ...                         strain
+aacd                                               0  ...  Bacillus subtilis 168 Marburg
+aadk                                               0  ...  Bacillus subtilis 168 Marburg
+aag                                                0  ...  Bacillus subtilis 168 Marburg
+aapa                                               0  ...  Bacillus subtilis 168 Marburg
+abba                                               0  ...  Bacillus subtilis 168 Marburg
+
+[5 rows x 10 columns]
+after adding index
+      flagedgeRremoved_Bacillus subtilis 168 Marburg  ...  gene
+aacd                                               0  ...  aacd
+aadk                                               0  ...  aadk
+aag                                                0  ...   aag
+aapa                                               0  ...  aapa
+abba                                               0  ...  abba
+
+[5 rows x 11 columns]
+exp_condition_cols: ['timepoint', 'iptg', 'cuminic_acid', 'vanillic_acid', 'xylose']
+cfm_input_df
+      flagedgeRremoved_Bacillus subtilis 168 Marburg  ...  gene
+abrb                                               0  ...  abrb
+acca                                               0  ...  acca
+accb                                               0  ...  accb
+accc                                               0  ...  accc
+accd                                               0  ...  accd
+
+[5 rows x 11 columns]
+3.974998740013689
+output
+      condition1     condition2  ...  xylose_2  comparison
+0  5, 0, 0, 0, 0  5, 0, 0, 0, 0  ...         0    1.000000
+2  5, 0, 0, 0, 0  5, 0, 0, 0, 1  ...         1    0.113636
+3  5, 0, 0, 0, 1  5, 0, 0, 0, 0  ...         1    0.113636
+4  5, 0, 0, 0, 0  5, 0, 0, 1, 0  ...         0    0.078652
+5  5, 0, 0, 1, 0  5, 0, 0, 0, 0  ...         0    0.078652
+
+[5 rows x 13 columns]
