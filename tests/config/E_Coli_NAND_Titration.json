@@ -1,10 +1,10 @@
 {
 	"int_factors": [
-		"Timepoint"
+		"timepoint"
 	],
 	"float_factors": [
-		"IPTG",
-		"Arabinose"
+		"iptg",
+		"arabinose"
 	],
 	"control_factors": {
 		"Strain": "MG1655_empty_landing_pads"

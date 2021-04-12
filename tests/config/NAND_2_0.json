@@ -1,10 +1,10 @@
 {
 	"int_factors": [
-		"Timepoint"
+		"timepoint"
 	],
 	"bool_factors": [
-		"IPTG",
-		"Arabinose"
+		"iptg",
+		"arabinose"
 	],
 	"parts": [
 		"RPU_Standard_Plasmid",

@@ -1,12 +1,12 @@
 {
 	"int_factors": [
-		"Timepoint"
+		"timepoint"
 	],
 	"bool_factors": [
-		"IPTG",
-		"Cuminic_acid",
-		"Vanillic_acid",
-		"Xylose"
+		"iptg",
+		"cuminic_acid",
+		"vanillic_acid",
+		"xylose"
 	],
 	"DE_tests": [
 		[

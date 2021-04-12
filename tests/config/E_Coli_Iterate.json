@@ -1,9 +1,9 @@
 {
 	"int_factors": [
-		"Timepoint"
+		"timepoint"
 	],
 	"bool_factors": [
-		"IPTG_concentration",
+		"iptg_concentration",
 		"arabinose_concentration"
 	],
 	"other_factors": [

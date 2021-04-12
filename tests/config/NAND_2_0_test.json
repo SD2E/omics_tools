@@ -1,7 +1,7 @@
 {
 	"bool_factors": [
-		"IPTG",
-		"Arabinose"
+		"iptg",
+		"arabinose"
 	],
 	"DE_tests": [
 		[
