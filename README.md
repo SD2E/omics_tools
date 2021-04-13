@@ -26,14 +26,21 @@ To run omics tools at scale, run the following command:
 ```python omics_tools/run_omics.py --input_counts_file <PATH_TO_COUNTS_FILE> --config_file <PATH_TO_CONFIG_FILE> --output_dir <PATH_TO_OUTPUT_DIR>```
 
 
-The configs listed are the following:
+Description of command line arguments:
 1. ```input_counts_file```: this is a pointer to the raw counts file on your system
 2. ```config_file```: this is a configuration file that describes all the comparisons that need to be made. Keys and values in config MUST line up with columns in your ```input_counts_file```
 3. ```output_dir```: Path to your output directory
 
-You can find example config files in ```tests/config```. Here is an example of executing for the Bacillus Inducer 1.0 ER from DARPA's SD2 program.
+You can find example config files in ```config```.
 
-```python omics_tools/run_omics.py --input_counts_file omics_tools/tests/data/experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv --config_file omics_tools/tests/config/Bacillus_Inducer_1_0.json --output_dir test_new```
+NOTE: the omics tools expects all factors in the following sections, when present, of the config file to be in lower case:
+1. ```int_factors```
+2. ```float_factors```
+3. ```bool_factor```
+
+Below is an example of executing the tool for the Bacillus Inducer 1.0 ER from DARPA's SD2 program.
+
+```python omics_tools/run_omics.py --input_counts_file omics_tools/examples/scaled_example/experiment.ginkgo.29422_ReadCountMatrix_preCAD_transposed.csv --config_file omics_tools/config/Bacillus_Inducer_1_0.json --output_dir omics_tools/examples/scaled_example```
 
 All output files will be generated in the "results" folder. Outputs will include:
 1. One txt file per comparison, named with the metadata.
