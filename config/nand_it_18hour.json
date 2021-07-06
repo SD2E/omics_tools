@@ -1,0 +1,26 @@
+{
+	"int_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"arabinose"
+	],
+	"control_factors": {
+		"strain": "MG1655_WT",
+		"arabinose": false,
+		"timepoint": 18
+	},
+	"DE_tests": [
+		[
+			"MG1655_WT",
+			"MG1655_WT_v2"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "NIt",
+	"comparison_target_column": "gene"
+}
