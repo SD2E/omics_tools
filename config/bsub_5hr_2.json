@@ -1,0 +1,30 @@
+{
+	"int_factors": [
+		"timepoint"
+	],
+	"bool_factors": [
+		"iptg"
+	],
+	"control_factors": {
+		"strain": "b_sub_2",
+		"iptg":false,
+		"timepoint": 5
+	},
+	"DE_tests": [
+		[
+			"b_sub_2",
+			"b_sub_3"
+		],
+		[
+			"b_sub_2",
+			"b_sub_4"
+		]
+	],
+	"add_one": false,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "NIt",
+	"comparison_target_column": "gene"
+}
