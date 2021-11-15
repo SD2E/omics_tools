@@ -1,0 +1,62 @@
+{
+	"bool_factors": [
+		"iptg",
+        "cuminic_acid"
+	],
+	"control_factors": {
+		"strain": "Bacillus subtilis 168 Marburg"
+	},
+	"DE_tests": [
+		[
+			"Bacillus subtilis 168 Marburg",
+			"Bacillus subtilis 168 Marburg"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(hisD) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(appC) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(ctaD) TSS+48__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(appB) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(narJ) TSS+48__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(hisZ) TSS+48__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(yuiB) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(czcD) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(maeS) TSS-150__COL1"
+		],
+		[
+			"Bacillus subtilis 168 Marburg",
+			"nor__p(yrbE) TSS-150__COL1"
+		]
+	],
+	"add_one": true,
+	"cf_value": 0,
+	"fdr_max": 0.05,
+	"log_fc_min": 1.2,
+	"batch_delay": 1800,
+	"output_name": "NIt",
+	"comparison_target_column": "gene"
+}
