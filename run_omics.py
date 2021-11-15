@@ -134,6 +134,7 @@ def load_config(config_file):
     except Exception as e:
         print('Failed to load config_file', e)
 
+    freedom = config_json["freedom"] if "freedom" in config_json else None
     int_factors = config_json["int_factors"] if "int_factors" in config_json else []
     bool_factors = config_json["bool_factors"] if "bool_factors" in config_json else []
     float_factors = config_json["float_factors"] if "float_factors" in config_json else []
@@ -153,7 +154,7 @@ def load_config(config_file):
         base_factor = [config_json['base_factor']]
     else:
         base_factor = None
-    return int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor
+    return freedom, int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor
 
 def main(counts_df_path, config_file, result_dir):
 
@@ -164,7 +165,7 @@ def main(counts_df_path, config_file, result_dir):
     print(counts_df.shape)
 
 
-    int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor = load_config(config_file)
+    freedom, int_factors, bool_factors, float_factors, control_factors, cf_value, hrm_experimental_condition_cols, DE_tests, add_one, fdr_max, log_fc_min, batch_delay, output_name, comparison_target_column,base_factor = load_config(config_file)
     print("hrm_experimental_condition_cols: {}".format(hrm_experimental_condition_cols))
     if not base_factor:
         base_factor = ['strain']
@@ -176,9 +177,9 @@ def main(counts_df_path, config_file, result_dir):
         if i not in control_factors:
             control_factors[i] = cf_value
 
-    for bf in bool_factors:
-        if bf not in control_factors:
-            control_factors[bf] = False
+#     for bf in bool_factors:
+#         if bf not in control_factors:
+#             control_factors[bf] = False
     # for ff in float_factors:
     #     control_factors[ff] = 0
         
@@ -202,11 +203,15 @@ def main(counts_df_path, config_file, result_dir):
     #groups_array = utils.group_by_factors(counts_df_qcd, factors_to_keep)
     
     # This generates aggregate_dict.json
+    print(f"freedom1: {freedom}")
+    if freedom is None:
+         freedom = len(sub_factors)+1 if add_one else len(sub_factors)
+    print(f"freedom2: {freedom}")
     comparison_indices = comparison_generator.generate_comparisons(counts_df_qcd,
                                                                    base_comparisons = DE_tests,
                                                                    base_factor = base_factor, 
                                                                    sub_factors = sub_factors,
-                                                                   freedom = len(sub_factors)+1 if add_one else len(sub_factors),
+                                                                   freedom = freedom,
                                                                    aggregation_flag = True,
                                                                    run_dir = run_dir,
                                                                    control_factor_in = control_factors)
@@ -225,7 +230,7 @@ def main(counts_df_path, config_file, result_dir):
                                                   sub_factors = sub_factors,
                                                   run_dir = run_dir,
                                                   filter_unused_base_factors = True,
-                                                  freedom = len(sub_factors)+1 if add_one else len(sub_factors),
+                                                  freedom = freedom,
                                                   export_tagwise_noise = False,
                                                   base_factor = base_factor,
                                                   control_factor_in = control_factors,
